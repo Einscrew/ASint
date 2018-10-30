@@ -14,7 +14,7 @@ def main():
         db = bookDB.bookDB("mylib")
 
 
-        daemon = Pyro4.Daemon(host='194.210.229.157')
+        daemon = Pyro4.Daemon(host='193.136.131.49')
         print(daemon)
         ns = Pyro4.locateNS(host='193.136.128.104', port=9090)
         print (ns)

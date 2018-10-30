@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add New Book</title>
+</head>
+<body>
+
+{% for item in books %}
+    <ul>
+        <ul>{{item[1]}}
+            <li><p>{{item[0]}}</p></li>
+            <li><p>{{item[2]}}</p></li>
+        </ul>
+    </ul>
+{% endfor %}
+
+</body>
+</html>
