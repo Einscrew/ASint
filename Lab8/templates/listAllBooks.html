@@ -13,8 +13,8 @@
     	<ul>
 	        <li><p>{{item[0]}}</p></li>
 	        <li><p>{{item[2]}}</p></li>
-	        <li><p id="likesNumber">likes: {{item[3]}}</li>
-	        <li><button onclick="liked(2)">like</button></li>
+	        <li><p id="likesNumber{{item[4]}}">likes: {{item[3]}}</li>
+	        <li><button onclick="liked({{item[4]}})">like</button></li>
     	</ul>
     </li>
 {% endfor %}
@@ -29,7 +29,7 @@ function liked(id){
         contentType: "application/json",
         data: '',
         success: function (data) {
-            $("#likesNumber").html("<p>likes: "+data["likes"]+"</p>")
+            $("#likesNumber"+id).html("<p>likes: "+data["likes"]+"</p>")
         }
     })
 }
