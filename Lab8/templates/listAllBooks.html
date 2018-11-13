@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add New Book</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body>
+
+<ul>
+{% for item in books %}
+    <li>{{item[1]}}
+    	<ul>
+	        <li><p>{{item[0]}}</p></li>
+	        <li><p>{{item[2]}}</p></li>
+	        <li><p id="likesNumber">likes: {{item[3]}}</li>
+	        <li><button onclick="liked(2)">like</button></li>
+    	</ul>
+    </li>
+{% endfor %}
+ </ul>
+
+<script>
+function liked(id){
+    $.ajax({
+        type: "POST",
+        url: "/API/Books/"+id+"/like",
+        datatype: "json",
+        contentType: "application/json",
+        data: '',
+        success: function (data) {
+            $("#likesNumber").html("<p>likes: "+data["likes"]+"</p>")
+        }
+    })
+}
+</script>
+</body>
+</html>
