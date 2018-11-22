@@ -35,7 +35,7 @@ method: POST,
 url: /API/admin/building/#buildingID/users/
 datatype: "",
 contentType: "",
-data: "" 
+data: ""
 ```
 
 # History
