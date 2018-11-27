@@ -50,6 +50,20 @@ function renderPage(){
 
 
 }
+
+(function getMessages() {
+  $.ajax({
+    url: 'API/users/"+userID+"/message/received', 
+    success: function(data) {
+      $("#receivedMsgs").val(data)
+    },
+    complete: function() {
+      // Schedule the next request when the current one's complete
+      setTimeout(getMessages, 1000);
+    }
+  });
+})();
+
 </script>
 
 </body>
