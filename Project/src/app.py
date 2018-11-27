@@ -78,9 +78,13 @@ def range(istID):
 	pass
 
 #List users in range
+awd = 0
 @app.route('/API/users/<string:istID>/received/')
 def received(istID):
-	pass
+	awd+=1
+	for i in range(awd):
+		s += "Hello there"+str(i)+"\n"
+	return s
 
 '''BOTS ENDPOINTS'''
 
