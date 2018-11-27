@@ -15,6 +15,9 @@ data: 'buildingId1, buildingName1, lat1, lon1\n
 The server will process each line, and retrieve the building that failed to insert,
 in case of success the number of buildings inserted is returned
 
+curl -X POST --data "@/home/einstein/IST/ASInt/repo/Project/src/buildings.txt" http://127.0.0.1:5000/API/admin/building/manage
+	
+
 --
 
 # ListLoggedUsers

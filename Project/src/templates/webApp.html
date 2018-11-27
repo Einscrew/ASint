@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebApp</title>
+    <script src ="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body>
+<h3 id="userID">user: ID</h3>
+<button id="loginBtn" onclick="login()">Login</button>
+<div id="loggedPage">
+	
+
+</div>
+
+<script>
+var userID
+function login(){
+    $.ajax({
+        type: "POST",
+        url: "/API/login/",
+        success: function (data) {
+        	console.log(data)
+        	userID=data["istID"]
+            $("#userID").text("user: "+userID)
+            renderPage()
+            $("#loginBtn").attr("disabled", "disabled");
+
+        }
+    })
+
+}
+function sendMsg(){
+	var message = $("#textMsg").val()
+	$.ajax({
+        type: "POST",
+        url: "/API/users/"+userID+"/message",
+        datatype: "json",
+        contentType: "application/json",
+        data: JSON.stringify({ 'message':message }),
+        success: function (data) {
+        	console.log("On sending message:", data)
+        }
+    })
+}
+function renderPage(){
+	$("#loggedPage").append("<textarea readonly id='receivedMsgs'></textarea><br>")
+	$("#loggedPage").append("<textarea id='textMsg' placeholder='Send message ...'></textarea><br>")
+	$("#loggedPage").append("<button id='send' onclick='sendMsg()'>Send</button><br>")
+
+
+}
+</script>
+
+</body>
+</html>

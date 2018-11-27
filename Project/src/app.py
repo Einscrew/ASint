@@ -2,8 +2,7 @@
 
 from flask import Flask
 from flask import render_template
-from flask import request
-from flask import jsonify
+from flask import request, jsonify, redirect
 import requests
 import json
 
@@ -12,10 +11,89 @@ app = Flask(__name__)
 FENIX_API = json.load(open("../keys.json",'r'))
 FENIX_API['redirectURI']= 'http://127.0.0.1:5000/messages'
 
+'''ADMIN ENDPOINTS'''
+
+#Manage Buildings
+@app.route('/API/admin/building/manage',methods=['PUT'])
+def buildingsManagement():
+	''' File containing buildings'''
+
+	for i in request.form:
+		print(i)
+		for line in i.split('\n'):
+
+			#j+=Building(line.split(','))
+			j += 1
+	return j
+
+#Logged Users
+@app.route('/API/admin/users/loggedin')
+def listLoggedUsers():
+	pass
+
+#Logged Users In building
+@app.route('/API/admin/building/<string:buildingID>/users')
+def listUsersInBuilding(buildingID):
+	pass
+
+#History
+@app.route('/API/admin/logs')
+def history():
+	pass
+
+#history by building
+@app.route('/API/admin/building/<string:buildingID>/logs/')
+def historyByBuilding(buildingID):
+	pass
+
+#history by user
+@app.route('/API/admin/users/<string:istID>/logs')
+def historyByUser(istID):
+	pass
+
+'''USER ENDPOINTS'''
+@app.route('/API/login/', methods=['POST'])
+def fenixLogin():
+	return jsonify({"istID":'2iwi2kd'})
+	#User(1234)
+	#fenixURL = 'https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id='+str(FENIX_API['clientID'])+'&redirect_uri='+FENIX_API['redirectURI']
+	#redirect(fenixURL)
+
+#Send Message
+@app.route('/API/users/<string:istID>/message', methods=['POST'])
+def sendMsg(istID):
+	print(request.is_json)
+	d= request.get_json()
+	print(d)
+	return 'Message Received'
+
+#Set Range
+@app.route('/API/users/<string:istID>/range/#range')
+def setRange(istID,methods=['PUT']):
+	pass
+
+#List users in range
+@app.route('/API/users/<string:istID>/range/')
+def range(istID):
+	pass
+
+#List users in range
+@app.route('/API/users/<string:istID>/received/')
+def received(istID):
+	pass
+
+'''BOTS ENDPOINTS'''
+
+
+
+#@app.route('/')
+#def hello_world():
+#	url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id='+str(FENIX_API['clientID'])+'&redirect_uri='+FENIX_API['redirectURI']
+#	return render_template("mainPage.html", url=url)
+
 @app.route('/')
 def hello_world():
-	url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id='+str(FENIX_API['clientID'])+'&redirect_uri='+FENIX_API['redirectURI']
-	return render_template("mainPage.html", url=url)
+	return render_template("webApp.html")
 
 @app.route('/messages')
 def messages():
@@ -24,7 +102,7 @@ def messages():
 	code = request.args.get('code')
 	access_token_request_url = 'https://fenix.tecnico.ulisboa.pt/oauth/access_token'
 	request_data = {'client_id': int(FENIX_API['clientID']), 'client_secret': FENIX_API['clientSecret'],
-			  'redirect_uri': FENIX_API['redirectURI'], 'code': code, 'grant_type': 'authorization_code'}
+			'redirect_uri': FENIX_API['redirectURI'], 'code': code, 'grant_type': 'authorization_code'}
 
 	request_access_token = requests.post(access_token_request_url, data=request_data)
 
