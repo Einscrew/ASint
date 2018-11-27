@@ -16,6 +16,9 @@ class Messages():
 		
 		return None
 
+	def Receive(message):
+		self.received['new'].append(message)
+
 class User:
 	def __init__(self, id : str):
 		self.ID = id
@@ -23,7 +26,10 @@ class User:
 		self.Location = {'lat':12, 'lon':14}
 		self.Range = 50 #meters
 		self.UsersInRange = {}
-	
+
+	def SendMessage(message):
+		for user in self.UsersInRange:
+			user.Messages.Receive(message)
 
 class Management:
 

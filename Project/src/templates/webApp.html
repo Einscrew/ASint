@@ -47,13 +47,11 @@ function renderPage(){
 	$("#loggedPage").append("<textarea readonly id='receivedMsgs'></textarea><br>")
 	$("#loggedPage").append("<textarea id='textMsg' placeholder='Send message ...'></textarea><br>")
 	$("#loggedPage").append("<button id='send' onclick='sendMsg()'>Send</button><br>")
-
-
 }
 
 (function getMessages() {
   $.ajax({
-    url: 'API/users/"+userID+"/message/received', 
+    url: 'API/users/'+userID+'/message/received', 
     success: function(data) {
       $("#receivedMsgs").val(data)
     },

@@ -11,6 +11,7 @@ app = Flask(__name__)
 FENIX_API = json.load(open("../keys.json",'r'))
 FENIX_API['redirectURI']= 'http://127.0.0.1:5000/messages'
 
+
 '''ADMIN ENDPOINTS'''
 
 #Manage Buildings
@@ -78,13 +79,9 @@ def range(istID):
 	pass
 
 #List users in range
-awd = 0
-@app.route('/API/users/<string:istID>/received/')
-def received(istID):
-	awd+=1
-	for i in range(awd):
-		s += "Hello there"+str(i)+"\n"
-	return s
+@app.route('/API/users/<string:istID>/message/received/')
+def received(istID, methods=['POST']):
+	return "Hello there\n"
 
 '''BOTS ENDPOINTS'''
 
