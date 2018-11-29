@@ -3,12 +3,15 @@
 from flask import Flask
 from flask import render_template
 from flask import request, jsonify, redirect
+
 import requests
 import json
 
 app = Flask(__name__)
 
-FENIX_API = json.load(open("../keys.json",'r'))
+with open("../keys.json",'r') as f:
+	FENIX_API = json.load(f)
+	
 FENIX_API['redirectURI']= 'http://127.0.0.1:5000/messages'
 
 
@@ -18,11 +21,9 @@ FENIX_API['redirectURI']= 'http://127.0.0.1:5000/messages'
 @app.route('/API/admin/building/manage',methods=['PUT'])
 def buildingsManagement():
 	''' File containing buildings'''
-
 	for i in request.form:
 		print(i)
 		for line in i.split('\n'):
-
 			#j+=Building(line.split(','))
 			j += 1
 	return j
