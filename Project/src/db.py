@@ -4,7 +4,7 @@ class Db():
 
 	def __init__(self, conn="mongodb://localhost:27017/", dbName="asint"):
 		self.client = pymongo.MongoClient(conn)
-		self.db = client[dbName]
+		self.db = self.client[dbName]
 
 	#### Users ####
 

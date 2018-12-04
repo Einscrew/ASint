@@ -1,8 +1,5 @@
-#!/usr/bin/env python
-
-from flask import Flask
-from flask import render_template
-from flask import request, jsonify, redirect
+#!/usr/bin/env python3
+from flask import Flask, render_template, request, jsonify, redirect
 import db
 
 import requests
@@ -98,7 +95,7 @@ def received(istID, methods=['POST']):
 def hello_world():
 	istID = 'ist' + str(randint(150000, 200000))
 	print(db.insertUser(istID, lat, lon, myRange))
-	return render_template("webApp.html")
+	return render_template("webApp.html", istID=istID)
 
 @app.route('/messages')
 def messages():
