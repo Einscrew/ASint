@@ -1,4 +1,5 @@
 import pymongo
+from datetime import datetime
 
 class Db():
 
@@ -8,9 +9,9 @@ class Db():
 
 	#### Users ####
 
-	def insertUser(self, istID, lat, lon, myRange):
+	def insertUser(self, istID, location, myRange):
 		try:
-			self.db["users"].insert_one({"_id": istID, "location":{ "lat": lat, "lon": lon}, "range": myRange})
+			self.db["users"].insert_one({"_id": istID, "location": location, "range": myRange})
 			return True
 		except:
 			print("Error inserting user")
@@ -26,46 +27,69 @@ class Db():
 
 	def updateUserLocation(self, istID, lat, lon):
 		try:
-			self.db["users"].update_one({"_id": istID}, {"$set": {"lat": lat, "lon": lon}})
+			self.db["users"].update_one({"_id": istID}, {"$set": {"location": location}})
 			return True
 		except:
 			print("Error changing user location")
+			return False
+
+	def updateUserRange(self, newRange):
+		try:
+			self.db["users"].update_one({"_id": istID}, {"$set": {"range": myRange}})
+			return True
+		except:
+			print("Error changing user range")
 			return False
 
 	def getAllLoggedUsers(self):
 		return self.db["users"].find()
 
 	#### Movements ####
-	def insertMovement(self, user, location):
+	def insertMovement(self, user, location, buildingID):
 		try:
-			self.db["movements"].insert_one({"user":user, "location":location })
+			self.db["movements"].insert_one({"user":user, "location":location, "building": buildingID, "time": datetime.now()})
 			return True
 		except:
 			print("Error inserting movement")
 			return False
 
 	def getUserMovements(self, user):
-		pass
+		return self.db["movements"].find({"_id": user})
+
+	def getBuildingMovements(self, buildingID):
+		return self.db["movements"].find({"building": buildingID}).sort("time", pymongo.ASCENDING)
 
 	#### Messages ####
-	def insertMessage(self, src, dest, msg, location):
+	def insertMessage(self, src, dest, msg, location, buildingID):
 		try:
-			self.db["messages"].insert_one({"src":src, "dst":dst, "content":msg, "location":location })
+			self.db["messages"].insert_one({"src": src, "dst": dst, "content": msg, "location": location, "building": buildingID ,"time": datetime.now()})
 			return True
 		except:
+			print("Error inserting message")
 			return False
 
-	def getMessages(self, user):
+	def getUserMessages(self, user):
 		try:
 			self.db["messages"].find({}, {"dest": 0}) #excludes destiny from the result
 			return True
 		except:
+			print("Error getting messages")
 			return False
 
 	def getAllMessages(self):
 		return self.db["messages"].find()
 
+	def getBuildingMessages(self, buildingID):
+		return self.db["messages"].find({"building": buildingID}).sort("time", pymongo.ASCENDING)
+
 	#### Buildings ####
+	def insertBuildings(self, buildingsList):
+		try:
+			self.db["buildings"].insert_many(buildingsList)
+			return True
+		except:
+			print("Error inserting movement")
+			return False
 
 	#### Bots ####
 	def insertBot(self, id):
