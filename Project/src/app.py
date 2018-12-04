@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from flask import Flask, render_template, request, jsonify, redirect
+from flask import Flask, abort, render_template, request, jsonify, redirect
 import db
 
 from random import randint
@@ -77,10 +77,14 @@ def fenixLogin():
 #Send Message
 @app.route('/API/users/<string:istID>/message', methods=['POST'])
 def sendMsg(istID):
-	print(request.is_json)
-	d = request.get_json()
-	print(d)
-	return 'Message Received'
+	try:
+		print(request.is_json)
+		d = request.get_json()
+		print(d)
+		#ALL IN RANGE
+		db.insertMessage(istID, [], d['message'], d['location'])
+	except
+		abort(json(message="something went wrong"))
 
 #Set Range
 @app.route('/API/users/<string:istID>/range/#range',methods=['PUT'])
@@ -88,14 +92,14 @@ def setRange(istID):
 	pass
 
 #List users in range
-@app.route('/API/users/<string:istID>/range/')
+@app.route('/API/users/<string:istID>/range')
 def range(istID):
 	pass
 
 #List users in range
-@app.route('/API/users/<string:istID>/message/received/', methods=['POST'])
+@app.route('/API/users/<string:istID>/message/received', methods=['POST'])
 def received(istID):
-	return "Hello there\n"
+	return jsonify(message="Hello there " +istID+"\n")
 
 '''BOTS ENDPOINTS'''
 
@@ -109,8 +113,10 @@ def received(istID):
 @app.route('/')
 def hello_world():
 	istID = 'ist' + str(randint(150000, 200000))
-	print(db.insertUser(istID, 12, 241, 9))
-	return render_template("webApp.html", istID=istID)
+	if db.insertUser(istID, {'lat':12,'lon':241}, 9):
+		return render_template("webApp.html", istID=istID)
+	else:
+		abort(jsonify(message="user already registered???"))
 
 @app.route('/logout')
 def logout(istID):

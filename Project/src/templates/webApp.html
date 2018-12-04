@@ -15,16 +15,18 @@
 renderPage()
 function sendMsg(){
 	var message = $("#textMsg").val()
-	$.ajax({
-        type: "POST",
-        url: "/API/users/{{istID}}/message",
-        datatype: "json",
-        contentType: "application/json",
-        data: JSON.stringify({ 'message':message }),
-        success: function (data) {
-        	console.log("On sending message:", data)
-        }
-    })
+	if(message != ""){
+        $.ajax({
+            type: "POST",
+            url: "/API/users/{{istID}}/message",
+            datatype: "json",
+            contentType: "application/json",
+            data: JSON.stringify({ 'message':message }),
+            success: function (data) {
+            	console.log("On sending message:", data)
+            }
+        })
+    }
 }
 function renderPage(){
 	$("#loggedPage").append("<textarea readonly id='receivedMsgs'></textarea><br>")
@@ -34,13 +36,15 @@ function renderPage(){
 
 (function getMessages() {
   $.ajax({
+    type: "POST",
     url: 'API/users/{{istID}}/message/received', 
     success: function(data) {
-      $("#receivedMsgs").val(data)
+        console.log(data)
+        $("#receivedMsgs").val(data)
     },
     complete: function() {
-      // Schedule the next request when the current one's complete
-      setTimeout(getMessages, 1000);
+        // Schedule the next request when the current one's complete
+        setTimeout(getMessages, 1000);
     }
   });
 })();
