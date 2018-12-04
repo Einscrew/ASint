@@ -6,14 +6,14 @@
     <script src ="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>
 <body>
-<h3 id="userID">user: {istID}</h3>
-<button id="loginBtn" onclick="login()">Logout?</button>
+<h3 id="userID">user: {{istID}}</h3>
+<!---<button id="loginBtn" onclick="login()">Logout?</button>-->
 <div id="loggedPage">
 </div>
 
 <script>
 var userID
-login()
+renderPage()
 function login(){
     $.ajax({
         type: "POST",

@@ -2,6 +2,7 @@
 from flask import Flask, render_template, request, jsonify, redirect
 import db
 
+from random import randint
 import requests
 import json
 
@@ -94,8 +95,8 @@ def received(istID, methods=['POST']):
 @app.route('/')
 def hello_world():
 	istID = 'ist' + str(randint(150000, 200000))
-	print(db.insertUser(istID, lat, lon, myRange))
-	return render_template("webApp.html", istID=istID)
+	print(db.insertUser(istID, 12, 241, 9))
+	return render_template("webApp.html", istID="ist171068")
 
 @app.route('/messages')
 def messages():
