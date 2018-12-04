@@ -12,28 +12,12 @@
 </div>
 
 <script>
-var userID
 renderPage()
-function login(){
-    $.ajax({
-        type: "POST",
-        url: "/API/login/",
-        success: function (data) {
-        	console.log(data)
-        	userID=data["istID"]
-            $("#userID").text("user: "+userID)
-            renderPage()
-            $("#loginBtn").attr("disabled", "disabled");
-
-        }
-    })
-
-}
 function sendMsg(){
 	var message = $("#textMsg").val()
 	$.ajax({
         type: "POST",
-        url: "/API/users/"+userID+"/message",
+        url: "/API/users/{{istID}}/message",
         datatype: "json",
         contentType: "application/json",
         data: JSON.stringify({ 'message':message }),
@@ -50,7 +34,7 @@ function renderPage(){
 
 (function getMessages() {
   $.ajax({
-    url: 'API/users/'+userID+'/message/received', 
+    url: 'API/users/{{istID}}/message/received', 
     success: function(data) {
       $("#receivedMsgs").val(data)
     },

@@ -54,6 +54,15 @@ def historyByBuilding(buildingID):
 def historyByUser(istID):
 	pass
 
+#create new bot
+@app.route('/API/admin/bot/create/<string:buildingID>', methods=['PUT'])
+def newBot(buildingID):
+	r = db.insertBot(buildingID)
+	return jsonify( { 'key':r, 'building':buildingID})
+
+
+
+
 '''USER ENDPOINTS'''
 @app.route('/API/login/', methods=['POST'])
 def fenixLogin():
@@ -71,8 +80,8 @@ def sendMsg(istID):
 	return 'Message Received'
 
 #Set Range
-@app.route('/API/users/<string:istID>/range/#range')
-def setRange(istID,methods=['PUT']):
+@app.route('/API/users/<string:istID>/range/#range',methods=['PUT'])
+def setRange(istID):
 	pass
 
 #List users in range
@@ -81,8 +90,8 @@ def range(istID):
 	pass
 
 #List users in range
-@app.route('/API/users/<string:istID>/message/received/')
-def received(istID, methods=['POST']):
+@app.route('/API/users/<string:istID>/message/received/', methods=['POST'])
+def received(istID):
 	return "Hello there\n"
 
 '''BOTS ENDPOINTS'''
@@ -98,7 +107,7 @@ def received(istID, methods=['POST']):
 def hello_world():
 	istID = 'ist' + str(randint(150000, 200000))
 	print(db.insertUser(istID, 12, 241, 9))
-	return render_template("webApp.html", istID)
+	return render_template("webApp.html", istID=istID)
 
 @app.route('/logout')
 def logout(istID):

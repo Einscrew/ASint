@@ -68,6 +68,21 @@ class Db():
 	#### Buildings ####
 
 	#### Bots ####
+	def insertBot(self, id):
+		try:
+			return db["bots"].insert_one({'building':id}).inserted_id.binary
+		except:
+			print('Error inserting Bot')
+			return False
+
+	def deleteBot(self, k):
+		try:
+			db["bots"].delete_one({'key':k})
+			return True
+		except:
+			return False
+
+
 
 
 
