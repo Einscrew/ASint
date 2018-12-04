@@ -1,19 +1,20 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 from flask import Flask
 from flask import render_template
 from flask import request, jsonify, redirect
+import db
 
 import requests
 import json
 
 app = Flask(__name__)
+db = db.Db()
 
 with open("../keys.json",'r') as f:
 	FENIX_API = json.load(f)
 	
 FENIX_API['redirectURI']= 'http://127.0.0.1:5000/messages'
-
 
 '''ADMIN ENDPOINTS'''
 
@@ -65,7 +66,7 @@ def fenixLogin():
 @app.route('/API/users/<string:istID>/message', methods=['POST'])
 def sendMsg(istID):
 	print(request.is_json)
-	d= request.get_json()
+	d = request.get_json()
 	print(d)
 	return 'Message Received'
 
@@ -95,6 +96,8 @@ def received(istID, methods=['POST']):
 
 @app.route('/')
 def hello_world():
+	istID = 'ist' + str(randint(150000, 200000))
+	print(db.insertUser(istID, lat, lon, myRange))
 	return render_template("webApp.html")
 
 @app.route('/messages')
