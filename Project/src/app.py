@@ -81,9 +81,8 @@ def sendMsg(istID):
 		print(request.is_json)
 		d = request.get_json()
 		print(d)
-		#ALL IN RANGE
-		db.insertMessage(istID, [], d['message'], d['location'])
-	except
+		db.insertMessage(istID, [db.getUsersInRange(istID)], d['message'], {'lat':d['lat'],'lon':d['lon']}, None)
+	except:
 		abort(json(message="something went wrong"))
 
 #Set Range

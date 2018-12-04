@@ -2,7 +2,6 @@ import pymongo
 from datetime import datetime
 import geo
 
-\
 class Db():
 
 	def __init__(self, conn="mongodb://localhost:27017/", dbName="asint"):

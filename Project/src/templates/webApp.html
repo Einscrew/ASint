@@ -21,7 +21,7 @@ function sendMsg(){
             url: "/API/users/{{istID}}/message",
             datatype: "json",
             contentType: "application/json",
-            data: JSON.stringify({ 'message':message }),
+            data: JSON.stringify({ 'message':message,'lat':0,'lon':0 }),
             success: function (data) {
             	console.log("On sending message:", data)
             }
@@ -40,7 +40,7 @@ function renderPage(){
     url: 'API/users/{{istID}}/message/received', 
     success: function(data) {
         console.log(data)
-        $("#receivedMsgs").val(data)
+        $("#receivedMsgs").val(data["message"])
     },
     complete: function() {
         // Schedule the next request when the current one's complete
