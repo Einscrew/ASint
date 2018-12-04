@@ -32,10 +32,44 @@ class Db():
 			print("Error changing user location")
 			return False
 
-	#### ADMIN ####
-
 	def getAllLoggedUsers(self):
 		return self.db["users"].find()
+
+	#### Movements ####
+	def insertMovement(self, user, location):
+		try:
+			self.db["movements"].insert_one({"user":user, "location":location })
+			return True
+		except:
+			print("Error inserting movement")
+			return False
+
+	def getUserMovements(self, user):
+		pass
+
+	#### Messages ####
+	def insertMessage(self, src, dest, msg, location):
+		try:
+			self.db["messages"].insert_one({"src":src, "dst":dst, "content":msg, "location":location })
+			return True
+		except:
+			return False
+
+	def getMessages(self, user):
+		try:
+			self.db["messages"].find({}, {"dest": 0}) #excludes destiny from the result
+			return True
+		except:
+			return False
+
+	def getAllMessages(self):
+		return self.db["messages"].find()
+
+	#### Buildings ####
+
+	#### Bots ####
+
+
 
 
 
