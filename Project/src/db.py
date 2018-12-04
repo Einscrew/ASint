@@ -1,14 +1,16 @@
 import pymongo
 from datetime import datetime
+import geo
 
+\
 class Db():
 
 	def __init__(self, conn="mongodb://localhost:27017/", dbName="asint"):
 		self.client = pymongo.MongoClient(conn)
 		self.db = self.client[dbName]
-
+	
+	#________________________________________________________________________
 	#### Users ####
-
 	def insertUser(self, istID, location, myRange):
 		try:
 			self.db["users"].insert_one({"_id": istID, "location": location, "range": myRange})
@@ -44,6 +46,16 @@ class Db():
 	def getAllLoggedUsers(self):
 		return self.db["users"].find()
 
+	def getUsersInRange(self, istid):
+		u = self.db["users"].find_one({'_id':istid})
+
+		inRange = lambda u1,u2: geo.distance(u1["location"],u2["location"]) < u1["range"]
+
+		allusers = self.db["users"].find()
+		return [user['_id'] for user in allusers if user['_id'] != istid and inRange(user, u)]
+
+
+	#________________________________________________________________________
 	#### Movements ####
 	def insertMovement(self, user, location, buildingID):
 		try:
@@ -59,6 +71,7 @@ class Db():
 	def getBuildingMovements(self, buildingID):
 		return self.db["movements"].find({"building": buildingID}).sort("time", pymongo.ASCENDING)
 
+	#________________________________________________________________________
 	#### Messages ####
 	def insertMessage(self, src, dest, msg, location, buildingID):
 		try:
@@ -81,7 +94,7 @@ class Db():
 
 	def getBuildingMessages(self, buildingID):
 		return self.db["messages"].find({"building": buildingID}).sort("time", pymongo.ASCENDING)
-
+	#________________________________________________________________________
 	#### Buildings ####
 	def insertBuildings(self, buildingsList):
 		try:
@@ -90,7 +103,7 @@ class Db():
 		except:
 			print("Error inserting movement")
 			return False
-
+	#________________________________________________________________________
 	#### Bots ####
 	def insertBot(self, id):
 		try:
@@ -105,7 +118,6 @@ class Db():
 			return True
 		except:
 			return False
-
 
 
 
