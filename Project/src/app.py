@@ -30,7 +30,9 @@ def buildingsManagement():
 #Logged Users
 @app.route('/API/admin/users/loggedin')
 def listLoggedUsers():
-	pass
+	users = db.getAllLoggedUsers()
+	for user in users:
+		print(user)
 
 #Logged Users In building
 @app.route('/API/admin/building/<string:buildingID>/users')
@@ -97,6 +99,13 @@ def hello_world():
 	istID = 'ist' + str(randint(150000, 200000))
 	print(db.insertUser(istID, 12, 241, 9))
 	return render_template("webApp.html", istID)
+
+@app.route('/logout')
+def logout(istID):
+	db.removeUser(istID)
+	#Here redirect to login page again
+	#return render_template("webApp.html", istID)
+
 
 @app.route('/messages')
 def messages():

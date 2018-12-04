@@ -32,6 +32,11 @@ class Db():
 			print("Error changing user location")
 			return False
 
+	#### ADMIN ####
+
+	def getAllLoggedUsers(self):
+		return self.db["users"].find()
+
 
 
 
