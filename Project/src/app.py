@@ -19,13 +19,12 @@ FENIX_API['redirectURI']= 'http://127.0.0.1:5000/messages'
 #Manage Buildings
 @app.route('/API/admin/building/manage',methods=['PUT'])
 def buildingsManagement():
+	buildingList = []
 	''' File containing buildings'''
 	for i in request.form:
-		print(i)
 		for line in i.split('\n'):
-			#j+=Building(line.split(','))
-			j += 1
-	return j
+			buildingList.add({"_id": ID, "name": name, "location": { "lat": lat, "lon": lon }})
+	db.insertBuildings(buildingList)
 
 #Logged Users
 @app.route('/API/admin/users/loggedin')
@@ -47,7 +46,11 @@ def history():
 #history by building
 @app.route('/API/admin/building/<string:buildingID>/logs/')
 def historyByBuilding(buildingID):
-	pass
+	#Movements in building
+	buildingMoves = db.getBuildingMovements(buildingID)
+	buildingMessages = db.getBuildingMessages(buildingID)
+
+	
 
 #history by user
 @app.route('/API/admin/users/<string:istID>/logs')
