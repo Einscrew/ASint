@@ -96,7 +96,7 @@ def received(istID, methods=['POST']):
 def hello_world():
 	istID = 'ist' + str(randint(150000, 200000))
 	print(db.insertUser(istID, 12, 241, 9))
-	return render_template("webApp.html", istID="ist171068")
+	return render_template("webApp.html", istID)
 
 @app.route('/messages')
 def messages():
