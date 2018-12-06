@@ -68,7 +68,7 @@ class Db():
 		return self.db["movements"].find({"_id": user})
 
 	def getBuildingMovements(self, buildingID):
-		return self.db["movements"].find({"building": buildingID}).sort("time", pymongo.ASCENDING)
+		return self.db["movements"].find({"building": buildingID})
 
 	#________________________________________________________________________
 	#### Messages ####
@@ -82,7 +82,7 @@ class Db():
 
 	def getUserMessages(self, user):
 		try:
-			self.db["messages"].find({}, {"dest": 0}) #excludes destiny from the result
+			self.db["messages"].find({"_id": user}, {"dest": 0}) #excludes destiny from the result
 			return True
 		except:
 			print("Error getting messages")
@@ -92,7 +92,7 @@ class Db():
 		return self.db["messages"].find()
 
 	def getBuildingMessages(self, buildingID):
-		return self.db["messages"].find({"building": buildingID}).sort("time", pymongo.ASCENDING)
+		return self.db["messages"].find({"building": buildingID})
 	#________________________________________________________________________
 	#### Buildings ####
 	def insertBuildings(self, buildingsList):

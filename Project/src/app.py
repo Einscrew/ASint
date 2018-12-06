@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from flask import Flask, abort, render_template, request, jsonify, redirect
+from itertools import chain
 import db
 
 from random import randint
@@ -48,14 +49,25 @@ def history():
 def historyByBuilding(buildingID):
 	#Movements in building
 	buildingMoves = db.getBuildingMovements(buildingID)
+	#Messages in building
 	buildingMessages = db.getBuildingMessages(buildingID)
 
-	
+	logs = sorted([l for l in chain(buildingMoves, buildingMessages)], key=lambda k: k['time'])
+	for log in logs:
+		print(log)
+
 
 #history by user
 @app.route('/API/admin/users/<string:istID>/logs')
 def historyByUser(istID):
-	pass
+	#User movements
+	userMovements = getUserMovements(istID)
+	#User messages
+	userMessages = getUserMessages(istID)
+
+	logs = sorted([l for l in chain(userMovements, userMessages)], key=lambda k: k['time'])
+	for log in logs:
+		print(log)
 
 #create new bot
 @app.route('/API/admin/bot/create/<string:buildingID>', methods=['PUT'])
