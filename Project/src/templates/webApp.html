@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>WebApp</title>
-    <script src ="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src ="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script><!--src="http://localhost/jquery.js" -->
 </head>
 <body>
 <h3 id="userID">user: {{istID}}</h3>
@@ -40,7 +40,7 @@ function renderPage(){
     url: 'API/users/{{istID}}/message/received', 
     success: function(data) {
         console.log(data)
-        $("#receivedMsgs").val(data["message"])
+        $("#receivedMsgs").val(data)//data["message"])
     },
     complete: function() {
         // Schedule the next request when the current one's complete

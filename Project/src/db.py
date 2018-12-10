@@ -74,7 +74,7 @@ class Db():
 	#### Messages ####
 	def insertMessage(self, src, dest, msg, location, buildingID):
 		try:
-			self.db["messages"].insert_one({"src": src, "dst": dst, "content": msg, "location": location, "building": buildingID ,"time": datetime.now()})
+			self.db["messages"].insert_one({"src": src, "dst": dest, "content": msg, "location": location, "building": buildingID ,"time": datetime.now()})
 			return True
 		except:
 			print("Error inserting message")
@@ -82,14 +82,13 @@ class Db():
 
 	def getUserMessages(self, user):
 		try:
-			self.db["messages"].find({"_id": user}, {"dest": 0}) #excludes destiny from the result
-			return True
+			return list(self.db["messages"].find({"_id": user}, {"dest": 0}) )#excludes destiny from the result
 		except:
 			print("Error getting messages")
 			return False
 
 	def getAllMessages(self):
-		return self.db["messages"].find()
+		return [i['content'] for i in self.db["messages"].find()]
 
 	def getBuildingMessages(self, buildingID):
 		return self.db["messages"].find({"building": buildingID})

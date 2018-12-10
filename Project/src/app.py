@@ -96,6 +96,7 @@ def sendMsg(istID):
 		db.insertMessage(istID, [db.getUsersInRange(istID)], d['message'], {'lat':d['lat'],'lon':d['lon']}, None)
 	except:
 		abort(json(message="something went wrong"))
+	return "ok"
 
 #Set Range
 @app.route('/API/users/<string:istID>/range/#range',methods=['PUT'])
@@ -110,7 +111,7 @@ def range(istID):
 #List users in range
 @app.route('/API/users/<string:istID>/message/received', methods=['POST'])
 def received(istID):
-	return jsonify(message="Hello there " +istID+"\n")
+	return str(db.getUserMessages(istID))
 
 '''BOTS ENDPOINTS'''
 
