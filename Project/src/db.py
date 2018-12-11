@@ -36,10 +36,10 @@ class Db():
 
 	def updateUserRange(self, newRange):
 		try:
-			self.db["users"].update_one({"_id": istID}, {"$set": {"range": myRange}})
+			self.db["users"].update_one({"_id": istID}, {"$set": {"range": newRange}})
 			return True
 		except:
-			print("Error changing user range")
+			print("Error updating user range")
 			return False
 
 	def getAllLoggedUsers(self):

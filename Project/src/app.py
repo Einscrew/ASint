@@ -101,7 +101,7 @@ def setRange(istID):
 	try:
 		print(request.is_json)
 		d = request.get_json()
-		return str(updateUserRange(newRange))
+		return str(db.updateUserRange(newRange))
 	except:
 		abort(json(message="something went wrong"))
 	return "ok"	
