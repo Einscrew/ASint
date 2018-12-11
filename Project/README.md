@@ -107,6 +107,17 @@ contentType: 'application/json',
 data:'{"lat":0.0000,"lon":12.3523}'
 ```
 
+# Update user location
+
+AWDNAWNAWJDAWLDBJAWJDBAWDJB
+```
+method: POST
+url: '/API/users/#istID/range/'
+datatype: 'json',
+contentType: 'application/json',
+data:'{"lat":0.0000,"lon":12.3523}'
+```
+
 # Get received messages
 
 Should user periodicly apply for new messages or, only a callback function be used each time?
