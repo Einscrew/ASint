@@ -26,7 +26,7 @@ class Db():
 			print("Error removing user")
 			return False
 
-	def updateUserLocation(self, istID, lat, lon):
+	def updateUserLocation(self, istID, location):
 		try:
 			self.db["users"].update_one({"_id": istID}, {"$set": {"location": location}})
 			return True
@@ -34,12 +34,12 @@ class Db():
 			print("Error changing user location")
 			return False
 
-	def updateUserRange(self, newRange):
+	def updateUserRange(self, istID, newRange):
 		try:
-			self.db["users"].update_one({"_id": istID}, {"$set": {"range": myRange}})
+			self.db["users"].update_one({"_id": istID}, {"$set": {"range": newRange}})
 			return True
 		except:
-			print("Error changing user range")
+			print("Error updating user range")
 			return False
 
 	def getAllLoggedUsers(self):
