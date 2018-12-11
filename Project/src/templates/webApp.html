@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>WebApp</title>
-    <script src ="http://localhost/jquery.js"></script><!--src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.<min class="js"></min>" -->
+    <script src ="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
 </head>
 <body>
 <h3 id="userID">user: {{istID}}</h3>
@@ -31,12 +31,17 @@ function sendMsg(){
     }
 }
 function renderPage(){
-	$("#loggedPage").append("<textarea readonly id='receivedMsgs'></textarea><br>")
-	$("#loggedPage").append("<textarea id='textMsg' placeholder='Send message ...'></textarea><br>")
+    $("#loggedPage").append("Current Location: ")
+    $("#loggedPage").append("<input id='lat' placeholder='lat'/>")
+    $("#loggedPage").append("<input id='lon' placeholder='lon'/><br><br>")
+    $("#loggedPage").append("Current range: ")
+    $("#loggedPage").append("<input id='range' value='10' />")
+    $("#loggedPage").append("<button id='changeRange' onclick='updateRange()'>Update Range</button><br><br>")
+    $("#loggedPage").append("Received Messages<br><br>")
+	$("#loggedPage").append("<textarea readonly id='receivedMsgs' rows=20 cols=60></textarea><br>")
+	$("#loggedPage").append("<textarea id='textMsg' rows=4 cols=60 placeholder='Send message ...'></textarea><br>")
 	$("#loggedPage").append("<button id='send' onclick='sendMsg()'>Send</button><br>")
-    $("#loggedPage").append("<input id='lat', placeholder='lat'/>")
-    $("#loggedPage").append("<input id='lon', placeholder='lon'/>")
-    //$("#loggedPage").append("<button onclick='location()'>Send</button><br>")
+    //$("#loggedPage").append("<button onclick='showPosition()'>Update Location</button><br>")
 }
 
 (function getMessages() {
@@ -61,18 +66,26 @@ function renderPage(){
     }
 
     function showPosition(position) {
-        $('#lat').val(position.coords.latitude)
-        $('#lon').val(position.coords.longitude)
+        console.log('User position has changed')
         $.ajax({
             type: "POST",
-            url: 'API/users/{{istID}}/message/received', 
+            url: 'API/users/{{istID}}/location/',
+            datatype: "json",
+            contentType: "application/json",
+            data: JSON.stringify({ 'lat': position.coords.latitude , 'lon': position.coords.longitude}),
             success: function(data) {
-                console.log(data)
-                $("#receivedMsgs").val(data)//data["message"])
-            },
-            complete: function() {
-                // Schedule the next request when the current one's complete
-                setTimeout(getMessages, 1000);
+                $('#lat').val(Math.round(position.coords.latitude * 100) / 100)
+                $('#lon').val(Math.round(position.coords.longitude * 100) / 100)
+            }
+        });
+    }
+
+    function updateRange() {
+        console.log('Range updated')
+        $.ajax({
+            type: "POST",
+            url: 'API/users/{{istID}}/range/' + $('#range').val(),
+            success: function(data) {
             }
         });
     }

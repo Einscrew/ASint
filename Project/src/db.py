@@ -26,7 +26,7 @@ class Db():
 			print("Error removing user")
 			return False
 
-	def updateUserLocation(self, istID, lat, lon):
+	def updateUserLocation(self, istID, location):
 		try:
 			self.db["users"].update_one({"_id": istID}, {"$set": {"location": location}})
 			return True

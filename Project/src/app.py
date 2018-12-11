@@ -96,9 +96,27 @@ def sendMsg(istID):
 	return "ok"
 
 #Set Range
-@app.route('/API/users/<string:istID>/range/#range',methods=['PUT'])
+@app.route('/API/users/<string:istID>/range/<int:newRange>',methods=['POST'])
 def setRange(istID):
-	pass
+	try:
+		print(request.is_json)
+		d = request.get_json()
+		return str(updateUserRange(newRange))
+	except:
+		abort(json(message="something went wrong"))
+	return "ok"	
+
+#Update user's location
+@app.route('/API/users/<string:istID>/location/',methods=['POST'])
+def updateLocation(istID):
+	try:
+		print(request.is_json)
+		d = request.get_json()
+		print(d)
+		db.updateUserLocation(istID, {'location': {'lat': d['lat'], 'lon': d['lon']}})
+	except:
+		abort(json(message="something went wrong"))
+	return "ok"
 
 #List users in range
 @app.route('/API/users/<string:istID>/range')
@@ -109,6 +127,7 @@ def range(istID):
 @app.route('/API/users/<string:istID>/message/received', methods=['POST'])
 def received(istID):
 	return jsonify(db.getUserMessages(istID))
+
 
 '''BOTS ENDPOINTS'''
 

@@ -109,10 +109,11 @@ data:'{"lat":0.0000,"lon":12.3523}'
 
 # Update user location
 
-AWDNAWNAWJDAWLDBJAWJDBAWDJB
+Update user's location
+
 ```
 method: POST
-url: '/API/users/#istID/range/'
+url: '/API/users/#istID/location/'
 datatype: 'json',
 contentType: 'application/json',
 data:'{"lat":0.0000,"lon":12.3523}'
