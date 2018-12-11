@@ -34,7 +34,7 @@ class Db():
 			print("Error changing user location")
 			return False
 
-	def updateUserRange(self, newRange):
+	def updateUserRange(self, istID, newRange):
 		try:
 			self.db["users"].update_one({"_id": istID}, {"$set": {"range": newRange}})
 			return True

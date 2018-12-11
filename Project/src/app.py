@@ -97,11 +97,11 @@ def sendMsg(istID):
 
 #Set Range
 @app.route('/API/users/<string:istID>/range/<int:newRange>',methods=['POST'])
-def setRange(istID):
+def setRange(istID, newRange):
 	try:
 		print(request.is_json)
 		d = request.get_json()
-		return str(db.updateUserRange(newRange))
+		return str(db.updateUserRange(istID, newRange))
 	except:
 		abort(json(message="something went wrong"))
 	return "ok"	
@@ -120,7 +120,7 @@ def updateLocation(istID):
 
 #List users in range
 @app.route('/API/users/<string:istID>/range')
-def range(istID):
+def usersInRange(istID):
 	pass
 
 #List users in range

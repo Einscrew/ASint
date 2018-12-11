@@ -81,11 +81,11 @@ function renderPage(){
     }
 
     function updateRange() {
-        console.log('Range updated')
         $.ajax({
             type: "POST",
             url: 'API/users/{{istID}}/range/' + $('#range').val(),
             success: function(data) {
+                console.log('Range updated')
             }
         });
     }
