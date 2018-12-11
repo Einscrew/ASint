@@ -47,11 +47,13 @@ class Db():
 
 	def getUsersInRange(self, istid):
 		u = self.db["users"].find_one({'_id':istid})
+		print(u)
 
 		inRange = lambda u1,u2: geo.distance(u1["location"],u2["location"]) < u1["range"]
 
 		allusers = self.db["users"].find()
-		return [user['_id'] for user in allusers if user['_id'] != istid and inRange(user, u)]
+
+		return [user['_id'] for user in allusers if user['_id'] != istid and inRange(u,user)]
 
 
 	#________________________________________________________________________
@@ -80,9 +82,11 @@ class Db():
 			print("Error inserting message")
 			return False
 
-	def getUserMessages(self, user):
+	def getUserMessages(self, user):	
 		try:
-			return list(self.db["messages"].find({"_id": user}, {"dest": 0}) )#excludes destiny from the result
+			r = [ [i['src'],i['content']] for i in self.db["messages"].find({"dst": user})]
+			print(r)
+			return r#excludes destiny from the result
 		except:
 			print("Error getting messages")
 			return False

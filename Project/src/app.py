@@ -76,8 +76,6 @@ def newBot(buildingID):
 	return jsonify( { 'key':r, 'building':buildingID})
 
 
-
-
 '''USER ENDPOINTS'''
 @app.route('/API/login/', methods=['POST'])
 def fenixLogin():
@@ -92,8 +90,7 @@ def sendMsg(istID):
 	try:
 		print(request.is_json)
 		d = request.get_json()
-		print(d)
-		db.insertMessage(istID, [db.getUsersInRange(istID)], d['message'], {'lat':d['lat'],'lon':d['lon']}, None)
+		return str(db.insertMessage(istID, db.getUsersInRange(istID), d['message'], {'lat':d['lat'],'lon':d['lon']}, None))
 	except:
 		abort(json(message="something went wrong"))
 	return "ok"
@@ -111,7 +108,7 @@ def range(istID):
 #List users in range
 @app.route('/API/users/<string:istID>/message/received', methods=['POST'])
 def received(istID):
-	return str(db.getUserMessages(istID))
+	return jsonify(db.getUserMessages(istID))
 
 '''BOTS ENDPOINTS'''
 

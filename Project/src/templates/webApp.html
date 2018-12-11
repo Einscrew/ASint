@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>WebApp</title>
-    <script src ="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script><!--src="http://localhost/jquery.js" -->
+    <script src ="http://localhost/jquery.js"></script><!--src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.<min class="js"></min>" -->
 </head>
 <body>
 <h3 id="userID">user: {{istID}}</h3>
@@ -24,7 +24,9 @@ function sendMsg(){
             data: JSON.stringify({ 'message':message,'lat':0,'lon':0 }),
             success: function (data) {
             	console.log("On sending message:", data)
+                $("#textMsg").val('')
             }
+
         })
     }
 }
@@ -32,6 +34,9 @@ function renderPage(){
 	$("#loggedPage").append("<textarea readonly id='receivedMsgs'></textarea><br>")
 	$("#loggedPage").append("<textarea id='textMsg' placeholder='Send message ...'></textarea><br>")
 	$("#loggedPage").append("<button id='send' onclick='sendMsg()'>Send</button><br>")
+    $("#loggedPage").append("<input id='lat', placeholder='lat'/>")
+    $("#loggedPage").append("<input id='lon', placeholder='lon'/>")
+    //$("#loggedPage").append("<button onclick='location()'>Send</button><br>")
 }
 
 (function getMessages() {
@@ -48,6 +53,17 @@ function renderPage(){
     }
   });
 })();
+
+    if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(showPosition);
+    } else {
+        alert("Geolocation is not supported by this browser.")
+    }
+
+    function showPosition(position) {
+        $('#lat').val(position.coords.latitude)
+        $('#lon').val(position.coords.longitude)
+    }
 
 </script>
 
