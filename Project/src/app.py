@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-from flask import Flask, abort, render_template, request, jsonify, redirect
+from flask import Flask, Response, abort, render_template, request, jsonify, redirect
 from itertools import chain
 import db
+
+from functools import wraps
 
 from random import randint
 import requests
 import json
 
 app = Flask(__name__)
+app.config.from_pyfile('settings')
+
 db = db.Db()
 
 with open("../keys.json",'r') as f:
@@ -15,39 +19,61 @@ with open("../keys.json",'r') as f:
 	
 FENIX_API['redirectURI']= 'http://127.0.0.1:5000/messages'
 
-'''ADMIN ENDPOINTS'''
 
+def validAdmin(username, password):
+    return username == app.config['USER'] and password == app.config['PASS']
+
+def admin(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        auth = request.authorization
+        if not auth.username or not auth.password or not validAdmin(auth.username, auth.password):
+            return Response('Credentials required!', 401, {'WWW-Authenticate': 'Basic realm="Login!"'})
+        return f(*args, **kwargs)
+    return wrapper
+
+'''ADMIN ENDPOINTS'''
 #Manage Buildings
 @app.route('/API/admin/building/manage',methods=['PUT'])
+@admin
 def buildingsManagement():
 	buildingList = []
 	''' File containing buildings'''
-	for i in request.form:
-		for line in i.split('\n'):
-			buildingList.add({"_id": ID, "name": name, "location": { "lat": lat, "lon": lon }})
+
+	if request.is_json:
+		buildingList = request.get_json()
+	else:
+		for i in request.form:
+			for line in i.split('\n'):
+				buildingList.add({"_id": ID, "name": name, "location": { "lat": lat, "lon": lon }})
 	db.insertBuildings(buildingList)
+	return "done"
 
 #Logged Users
-@app.route('/API/admin/users/loggedin')
+@app.route('/API/admin/users/loggedin', methods=['POST'])
+@admin
 def listLoggedUsers():
 	users = db.getAllLoggedUsers()
 	for user in users:
 		print(user)
 
 #Logged Users In building
-@app.route('/API/admin/building/<string:buildingID>/users')
+@app.route('/API/admin/building/<string:buildingID>/users', methods=['POST'])
+@admin
 def listUsersInBuilding(buildingID):
-	pass
+	return str(buildingID)
 
 #History
-@app.route('/API/admin/logs')
+@app.route('/API/admin/logs', methods=['POST'])
+@admin
 def history():
-	pass
+	return "hello"+request.url
 
 #history by building
-@app.route('/API/admin/building/<string:buildingID>/logs/')
+@app.route('/API/admin/building/<string:buildingID>/logs', methods=['POST'])
 def historyByBuilding(buildingID):
 	#Movements in building
+	return 'by building'
 	buildingMoves = db.getBuildingMovements(buildingID)
 	#Messages in building
 	buildingMessages = db.getBuildingMessages(buildingID)
@@ -56,10 +82,12 @@ def historyByBuilding(buildingID):
 	for log in logs:
 		print(log)
 
+	return str(logs)
 
 #history by user
-@app.route('/API/admin/users/<string:istID>/logs')
+@app.route('/API/admin/users/<string:istID>/logs', methods=['POST'])
 def historyByUser(istID):
+	return 'by user'
 	#User movements
 	userMovements = getUserMovements(istID)
 	#User messages
@@ -68,6 +96,8 @@ def historyByUser(istID):
 	logs = sorted([l for l in chain(userMovements, userMessages)], key=lambda k: k['time'])
 	for log in logs:
 		print(log)
+
+	return str(logs)
 
 #create new bot
 @app.route('/API/admin/bot/create/<string:buildingID>', methods=['PUT'])
