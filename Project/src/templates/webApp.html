@@ -73,7 +73,7 @@
         console.log('User position has changed')
         $.ajax({
             type: "POST",
-            url: 'API/users/{{istID}}/location/',
+            url: 'API/users/{{istID}}/location',
             datatype: "json",
             contentType: "application/json",
             data: JSON.stringify({ 'lat': position.coords.latitude , 'lon': position.coords.longitude}),
@@ -90,9 +90,10 @@
     function getUsersInRangeAndInBuilding(){
         $.ajax({
             type: "POST",
-            url: 'API/users/{{istID}}/range/',
+            url: 'API/users/{{istID}}/range',
             success: function(data) {
-                
+                console.log(data)
+                $("#inRange").val(data['users'])
             }
         });
     }
@@ -110,7 +111,7 @@
     function updateUserBuilding(){
         $.ajax({
             type: "POST",
-            url: 'API/users/{{istID}}/building/',
+            url: 'API/users/{{istID}}/building',
             success: function(data) {
                 console.log('Building updated')
             }
