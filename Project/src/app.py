@@ -174,8 +174,6 @@ def usersInRange(istID):
 		usersInBuilding = db.getUsersInSameBuilding(istID)
 		if usersInBuilding != None:
 			users.union(usersInBuilding)
-
-		print('USERS IN RANGE')
 		s = "\n"
 		seq = (u for u in users)
 		return jsonify({'users': s.join(seq)})
