@@ -153,7 +153,7 @@ def updateLocation(istID):
 		print(request.is_json)
 		d = request.get_json()
 		print(d)
-		db.updateUserLocation(istID, {'location': {'lat': d['lat'], 'lon': d['lon']}})
+		db.updateUserLocation(istID,{'lat': d['lat'], 'lon': d['lon']})
 	except:
 		abort(json(message="something went wrong"))
 	return "ok"
@@ -161,12 +161,27 @@ def updateLocation(istID):
 #List users in range
 @app.route('/API/users/<string:istID>/range')
 def usersInRange(istID):
-	pass
+	try:
+		print(request.is_json)
+		d = request.get_json()
+		print(d)
+		users = db.getUsersInRange()
+		users += db.getUsersInSameBuilding()
+		return set(users)
+	except:
+		abort(json(message="something went wrong"))
+	return "ok"
 
 #List users in range
 @app.route('/API/users/<string:istID>/message/received', methods=['POST'])
 def received(istID):
 	return jsonify(db.getUserMessages(istID))
+
+#Updates user's building
+@app.route('/API/users/<string:istID>/building/', methods=['POST'])
+def updateBuilding(istID):
+	db.getUserBuilding(istID)
+	return "ok"
 
 
 '''BOTS ENDPOINTS'''
@@ -181,7 +196,7 @@ def received(istID):
 @app.route('/')
 def hello_world():
 	istID = 'ist' + str(randint(150000, 200000))
-	if db.insertUser(istID, {'lat':12,'lon':241}, 9):
+	if db.insertUser(istID, {'lat':12,'lon':241}, 10):
 		return render_template("webApp.html", istID=istID)
 	else:
 		abort(jsonify(message="user already registered???"))
