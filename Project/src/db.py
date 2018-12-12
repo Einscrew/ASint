@@ -67,15 +67,12 @@ class Db():
 
 		return [user['_id'] for user in allusers if user['_id'] != istID and inRange(u,user)]
 
-	# TO REVIEW
+	# TO DO
 	def getUsersInSameBuilding(self, istID):
 		user = self.db['users'].find_one({'_id': istID})
 
 		if user['building'] != None:
-			building = self.db['buildings'].find_one({'_id': user['building']})
-			inBuilding= lambda u1,u2: geo.distance(u1['location'],u2['location']) < 50
-			allusers = self.db['users'].find()
-			return [user['_id'] for user in allusers if user['_id'] != istID and inBuilding(building,user)]
+			return None
 		else:
 			return None
 
