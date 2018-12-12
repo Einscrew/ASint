@@ -100,11 +100,17 @@ class Db():
 	#### Buildings ####
 	def insertBuildings(self, buildingsList):
 		try:
+			#self.db["buildings"].drop()
 			self.db["buildings"].insert_many(buildingsList)
 			return True
 		except:
 			print("Error inserting movement")
 			return False
+
+	def getBuildings(self):
+		s = self.db["buildings"].find({},{'_id':0})
+		return list(s)
+
 	#________________________________________________________________________
 	#### Bots ####
 	def insertBot(self, id):

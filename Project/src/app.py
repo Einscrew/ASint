@@ -34,7 +34,7 @@ def admin(f):
 
 '''ADMIN ENDPOINTS'''
 #Manage Buildings
-@app.route('/API/admin/building/manage',methods=['PUT'])
+@app.route('/API/admin/buildings/manage',methods=['PUT'])
 @admin
 def buildingsManagement():
 	buildingList = []
@@ -49,6 +49,13 @@ def buildingsManagement():
 	db.insertBuildings(buildingList)
 	return "done"
 
+@app.route('/API/admin/buildings',methods=['POST'])
+@admin
+def buildingsList():
+	s = db.getBuildings()
+	print(jsonify(s))
+	return jsonify(s)
+
 #Logged Users
 @app.route('/API/admin/users/loggedin', methods=['POST'])
 @admin
@@ -58,7 +65,7 @@ def listLoggedUsers():
 		print(user)
 
 #Logged Users In building
-@app.route('/API/admin/building/<string:buildingID>/users', methods=['POST'])
+@app.route('/API/admin/buildings/<string:buildingID>/users', methods=['POST'])
 @admin
 def listUsersInBuilding(buildingID):
 	return str(buildingID)
@@ -70,7 +77,8 @@ def history():
 	return "hello"+request.url
 
 #history by building
-@app.route('/API/admin/building/<string:buildingID>/logs', methods=['POST'])
+@app.route('/API/admin/buildings/<string:buildingID>/logs', methods=['POST'])
+@admin
 def historyByBuilding(buildingID):
 	#Movements in building
 	return 'by building'
@@ -86,6 +94,7 @@ def historyByBuilding(buildingID):
 
 #history by user
 @app.route('/API/admin/users/<string:istID>/logs', methods=['POST'])
+@admin
 def historyByUser(istID):
 	return 'by user'
 	#User movements
@@ -101,6 +110,7 @@ def historyByUser(istID):
 
 #create new bot
 @app.route('/API/admin/bot/create/<string:buildingID>', methods=['PUT'])
+@admin
 def newBot(buildingID):
 	r = db.insertBot(buildingID)
 	return jsonify( { 'key':r, 'building':buildingID})
