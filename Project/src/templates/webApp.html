@@ -12,55 +12,59 @@
 </div>
 
 <script>
-renderPage()
-function sendMsg(){
-	var message = $("#textMsg").val()
-	if(message != ""){
-        $.ajax({
-            type: "POST",
-            url: "/API/users/{{istID}}/message",
-            datatype: "json",
-            contentType: "application/json",
-            data: JSON.stringify({ 'message':message,'lat':0,'lon':0 }),
-            success: function (data) {
-            	console.log("On sending message:", data)
-                $("#textMsg").val('')
-            }
+    renderPage()
 
-        })
-    }
-}
-function renderPage(){
-    $("#loggedPage").append("Current Location: ")
-    $("#loggedPage").append("<input id='lat' placeholder='lat'/>")
-    $("#loggedPage").append("<input id='lon' placeholder='lon'/><br><br>")
-    $("#loggedPage").append("Current range: ")
-    $("#loggedPage").append("<input id='range' value='10' />")
-    $("#loggedPage").append("<button id='changeRange' onclick='updateRange()'>Update Range</button><br><br>")
-    $("#loggedPage").append("Received Messages<br><br>")
-	$("#loggedPage").append("<textarea readonly id='receivedMsgs' rows=20 cols=60></textarea><br>")
-	$("#loggedPage").append("<textarea id='textMsg' rows=4 cols=60 placeholder='Send message ...'></textarea><br>")
-	$("#loggedPage").append("<button id='send' onclick='sendMsg()'>Send</button><br>")
-    //$("#loggedPage").append("<button onclick='showPosition()'>Update Location</button><br>")
-}
+    function sendMsg(){
+    	var message = $("#textMsg").val()
+    	if(message != ""){
+            $.ajax({
+                type: "POST",
+                url: "/API/users/{{istID}}/message",
+                datatype: "json",
+                contentType: "application/json",
+                data: JSON.stringify({ 'message':message,'lat':0,'lon':0 }),
+                success: function (data) {
+                	console.log("On sending message:", data)
+                    $("#textMsg").val('')
+                }
 
-(function getMessages() {
-  $.ajax({
-    type: "POST",
-    url: 'API/users/{{istID}}/message/received', 
-    success: function(data) {
-        console.log(data)
-        $("#receivedMsgs").val(data)//data["message"])
-    },
-    complete: function() {
-        // Schedule the next request when the current one's complete
-        setTimeout(getMessages, 1000);
+            })
+        }
+    } 
+
+    function renderPage(){
+        $("#loggedPage").append("Current location: ")
+        $("#loggedPage").append("<input id='lat' placeholder='lat'/>")
+        $("#loggedPage").append("<input id='lon' placeholder='lon'/><br><br>")
+        $("#loggedPage").append("Current range: ")
+        $("#loggedPage").append("<input id='range' value='10' />")
+        $("#loggedPage").append("<button id='changeRange' onclick='updateRange()'>Update Range</button><br><br>")
+        $("#loggedPage").append("Users in range and in building:<br><br>")
+        $("#loggedPage").append("<textarea readonly id='inRange' rows=10 cols=60></textarea><br>")
+        $("#loggedPage").append("<button id='getUsers' onclick='getUsersInRangeAndInBuilding()'>Check who is nearby</button><br><br>")
+        $("#loggedPage").append("Received Messages:<br><br>")
+    	$("#loggedPage").append("<textarea readonly id='receivedMsgs' rows=15 cols=60></textarea><br>")
+    	$("#loggedPage").append("<textarea id='textMsg' rows=4 cols=60 placeholder='Send message ...'></textarea><br>")
+    	$("#loggedPage").append("<button id='send' onclick='sendMsg()'>Send</button>")
     }
-  });
-})();
+
+    (function getMessages() {
+      $.ajax({
+        type: "POST",
+        url: 'API/users/{{istID}}/message/received', 
+        success: function(data) {
+            console.log(data)
+            $("#receivedMsgs").val(data)//data["message"])
+        },
+        complete: function() {
+            // Schedule the next request when the current one's complete
+            setTimeout(getMessages, 1000);
+        }
+      });
+    })();
 
     if (navigator.geolocation) {
-        navigator.geolocation.watchPosition(showPosition);
+        navigator.geolocation.watchPosition(showPosition)
     } else {
         alert("Geolocation is not supported by this browser.")
     }
@@ -76,6 +80,19 @@ function renderPage(){
             success: function(data) {
                 $('#lat').val(Math.round(position.coords.latitude * 100) / 100)
                 $('#lon').val(Math.round(position.coords.longitude * 100) / 100)
+            },
+            complete: function() {
+                updateUserBuilding()
+            }
+        });
+    }
+
+    function getUsersInRangeAndInBuilding(){
+        $.ajax({
+            type: "POST",
+            url: 'API/users/{{istID}}/range/',
+            success: function(data) {
+                
             }
         });
     }
@@ -86,6 +103,16 @@ function renderPage(){
             url: 'API/users/{{istID}}/range/' + $('#range').val(),
             success: function(data) {
                 console.log('Range updated')
+            }
+        });
+    }
+
+    function updateUserBuilding(){
+        $.ajax({
+            type: "POST",
+            url: 'API/users/{{istID}}/building/',
+            success: function(data) {
+                console.log('Building updated')
             }
         });
     }
