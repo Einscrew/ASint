@@ -89,9 +89,9 @@ def historyByBuilding(buildingID, moves=True, messages=True):
 
 	if moves and messages:
 		logs = sorted([l for l in chain(buildingMoves, buildingMessages)], key=lambda k: k['time'])
-	else if moves and not messages:
+	elif moves and not messages:
 		logs = buildingMoves
-	else if messages and not moves:
+	elif messages and not moves:
 		logs = buildingMessages
 
 	return str(logs)
@@ -109,9 +109,9 @@ def historyByUser(istID, moves=True, messages=True):
 
 	if moves and messages:
 		logs = sorted([l for l in chain(userMovements, userMessages)], key=lambda k: k['time'])
-	else if moves and not messages:
+	elif moves and not messages:
 		logs = userMovements
-	else if messages and not moves:
+	elif messages and not moves:
 		logs = userMessages
 
 	return str(logs)
