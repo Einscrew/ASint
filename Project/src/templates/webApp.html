@@ -22,12 +22,12 @@
                 url: "/API/users/{{istID}}/message",
                 datatype: "json",
                 contentType: "application/json",
-                data: JSON.stringify({ 'message':message,'lat':0,'lon':0 }),
+                data: JSON.stringify({ 'message':message,'lat':0,'lon':0 }),               
                 success: function (data) {
-                	console.log("On sending message:", data)
+                    console.log("On sending message:", data)
                     $("#textMsg").val('')
                 }
-
+                
             })
         }
     } 
@@ -51,15 +51,16 @@
     (function getMessages() {
       $.ajax({
         type: "POST",
-        url: 'API/users/{{istID}}/message/received', 
-        success: function(data) {
-            console.log(data)
+        url: 'API/users/{{istID}}/message/received',
+        success:function(data) {
+            console.log('ok')
             $("#receivedMsgs").val(data)//data["message"])
-        },
-        complete: function() {
-            // Schedule the next request when the current one's complete
             setTimeout(getMessages, 1000);
+        },
+        error:function(){
+            window.location.reload()
         }
+
       });
     })();
 
