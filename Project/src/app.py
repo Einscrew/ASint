@@ -116,34 +116,42 @@ def history():
 	return "hello"+request.url
 
 #history by building
-@app.route('/API/admin/buildings/<string:buildingID>/logs', methods=['POST'])
-@admin
-def historyByBuilding(buildingID):
-	#Movements in building
-	return 'by building'
-	buildingMoves = db.getBuildingMovements(buildingID)
-	#Messages in building
-	buildingMessages = db.getBuildingMessages(buildingID)
+@app.route('/API/admin/building/<string:buildingID>/logs', methods=['POST'])
+def historyByBuilding(buildingID, moves=True, messages=True):
+	#return 'by building'
+	if moves:
+		#Movements in building
+		buildingMoves = db.getBuildingMovements(buildingID)
+	if messages:
+		#Messages in building
+		buildingMessages = db.getBuildingMessages(buildingID)
 
-	logs = sorted([l for l in chain(buildingMoves, buildingMessages)], key=lambda k: k['time'])
-	for log in logs:
-		print(log)
+	if moves and messages:
+		logs = sorted([l for l in chain(buildingMoves, buildingMessages)], key=lambda k: k['time'])
+	elif moves and not messages:
+		logs = buildingMoves
+	elif messages and not moves:
+		logs = buildingMessages
 
 	return str(logs)
 
 #history by user
 @app.route('/API/admin/users/<string:istID>/logs', methods=['POST'])
-@admin
-def historyByUser(istID):
-	return 'by user'
-	#User movements
-	userMovements = getUserMovements(istID)
-	#User messages
-	userMessages = getUserMessages(istID)
+def historyByUser(istID, moves=True, messages=True):
+	#return 'by user'
+	if moves:
+		#User movements
+		userMovements = getUserMovements(istID)
+	if messages:
+		#User messages
+		userMessages = getUserMessages(istID)
 
-	logs = sorted([l for l in chain(userMovements, userMessages)], key=lambda k: k['time'])
-	for log in logs:
-		print(log)
+	if moves and messages:
+		logs = sorted([l for l in chain(userMovements, userMessages)], key=lambda k: k['time'])
+	elif moves and not messages:
+		logs = userMovements
+	elif messages and not moves:
+		logs = userMessages
 
 	return str(logs)
 
@@ -186,7 +194,7 @@ def setRange(istID, newRange):
 	return "ok"	
 
 #Update user's location
-@app.route('/API/users/<string:istID>/location/',methods=['POST'])
+@app.route('/API/users/<string:istID>/location',methods=['POST'])
 def updateLocation(istID):
 	try:
 		print(request.is_json)
@@ -198,15 +206,16 @@ def updateLocation(istID):
 	return "ok"
 
 #List users in range
-@app.route('/API/users/<string:istID>/range')
+@app.route('/API/users/<string:istID>/range', methods=['POST'])
 def usersInRange(istID):
-	try:
-		print(request.is_json)
-		d = request.get_json()
-		print(d)
-		users = db.getUsersInRange()
-		users += db.getUsersInSameBuilding()
-		return set(users)
+	try:		
+		users = db.getUsersInRange(istID)
+		usersInBuilding = db.getUsersInSameBuilding(istID)
+		if usersInBuilding != None:
+			users.union(usersInBuilding)
+		s = "\n"
+		seq = (u for u in users)
+		return jsonify({'users': s.join(seq)})
 	except:
 		abort(json(message="something went wrong"))
 	return "ok"
@@ -219,7 +228,7 @@ def received(istID):
 	return jsonify(db.getUserMessages(istID))
 
 #Updates user's building
-@app.route('/API/users/<string:istID>/building/', methods=['POST'])
+@app.route('/API/users/<string:istID>/building', methods=['POST'])
 def updateBuilding(istID):
 	db.getUserBuilding(istID)
 	return "ok"

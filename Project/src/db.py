@@ -59,20 +59,18 @@ class Db():
 
 	def getUsersInRange(self, istID):
 		u = self.db['users'].find_one({'_id':istID})
-		print(u)
-
 		inRange = lambda u1,u2: geo.distance(u1['location'],u2['location']) < u1['range']
 
 		allusers = self.db['users'].find()
 
-		return [user['_id'] for user in allusers if user['_id'] != istID and inRange(u,user)]
+		return set(user['_id'] for user in allusers if user['_id'] != istID and inRange(u,user))
 
-	# TO DO
 	def getUsersInSameBuilding(self, istID):
 		user = self.db['users'].find_one({'_id': istID})
+		allusers = self.db['users'].find()
 
 		if user['building'] != None:
-			return None
+			return set(u['_id'] for u in allusers if u['_id'] != istID and u['building'] == user['building'])
 		else:
 			return None
 
@@ -87,10 +85,10 @@ class Db():
 			return False
 
 	def getUserMovements(self, user):
-		return self.db['movements'].find({'_id': user})
+		return self.db['movements'].find({'_id': user}).sort('time')
 
 	def getBuildingMovements(self, buildingID):
-		return self.db['movements'].find({'building': buildingID})
+		return self.db['movements'].find({'building': buildingID}).sort('time')
 
 	#________________________________________________________________________
 	#### Messages ####
@@ -104,7 +102,7 @@ class Db():
 
 	def getUserMessages(self, user):	
 		try:
-			r = [ [i['src'],i['content']] for i in self.db['messages'].find({'dst': user})]
+			r = [ [i['src'],i['content'], i['time']] for i in self.db['messages'].find({'dst': user})].sort(key=lambda e: e[2])
 			print(r)
 			return r#excludes destiny from the result
 		except:
@@ -115,7 +113,7 @@ class Db():
 		return [i['content'] for i in self.db['messages'].find()]
 
 	def getBuildingMessages(self, buildingID):
-		return self.db['messages'].find({'building': buildingID})
+		return self.db['messages'].find({'building': buildingID}).sort('time')
 	#________________________________________________________________________
 	#### Buildings ####
 	def insertBuildings(self, buildingsList):

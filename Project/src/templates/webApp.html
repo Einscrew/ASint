@@ -41,7 +41,7 @@
         $("#loggedPage").append("<button id='changeRange' onclick='updateRange()'>Update Range</button><br><br>")
         $("#loggedPage").append("Users in range and in building:<br><br>")
         $("#loggedPage").append("<textarea readonly id='inRange' rows=10 cols=60></textarea><br>")
-        $("#loggedPage").append("<button id='getUsers' onclick='getUsersInRangeAndInBuilding()'>Check who is nearby</button><br><br>")
+        //$("#loggedPage").append("<button id='getUsers' onclick='getUsersInRangeAndInBuilding()'>Check who is nearby</button><br><br>")
         $("#loggedPage").append("Received Messages:<br><br>")
     	$("#loggedPage").append("<textarea readonly id='receivedMsgs' rows=15 cols=60></textarea><br>")
     	$("#loggedPage").append("<textarea id='textMsg' rows=4 cols=60 placeholder='Send message ...'></textarea><br>")
@@ -74,7 +74,7 @@
         console.log('User position has changed')
         $.ajax({
             type: "POST",
-            url: 'API/users/{{istID}}/location/',
+            url: 'API/users/{{istID}}/location',
             datatype: "json",
             contentType: "application/json",
             data: JSON.stringify({ 'lat': position.coords.latitude , 'lon': position.coords.longitude}),
@@ -88,15 +88,20 @@
         });
     }
 
-    function getUsersInRangeAndInBuilding(){
+    (function getUsersInRangeAndInBuilding(){
         $.ajax({
             type: "POST",
-            url: 'API/users/{{istID}}/range/',
+            url: 'API/users/{{istID}}/range',
             success: function(data) {
-                
+                console.log(data)
+                $("#inRange").val(data['users'])
+            },
+            complete: function() {
+                // Schedule the next request when the current one's complete
+                setTimeout(getUsersInRangeAndInBuilding, 5000);
             }
         });
-    }
+    })();
 
     function updateRange() {
         $.ajax({
@@ -111,7 +116,7 @@
     function updateUserBuilding(){
         $.ajax({
             type: "POST",
-            url: 'API/users/{{istID}}/building/',
+            url: 'API/users/{{istID}}/building',
             success: function(data) {
                 console.log('Building updated')
             }
