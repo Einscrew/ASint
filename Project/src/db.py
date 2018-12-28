@@ -2,9 +2,11 @@ import pymongo
 from datetime import datetime
 import geo
 
+connString = 'mongodb://asint:#asint2018@saint-shard-00-00-xygyu.gcp.mongodb.net:27017,saint-shard-00-01-xygyu.gcp.mongodb.net:27017,saint-shard-00-02-xygyu.gcp.mongodb.net:27017/test?ssl=true&replicaSet=Saint-shard-0&authSource=admin&retryWrites=true'
+
 class Db():
 
-	def __init__(self, conn='mongodb://localhost:27017/', dbName='asint'):
+	def __init__(self, conn=connString, dbName='asint'):
 		self.client = pymongo.MongoClient(conn)
 		self.db = self.client[dbName]
 	
