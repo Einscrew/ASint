@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebApp</title>
+    <script src ="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+</head>
+<body>
+<h3 id="userID">user: {{istID}}</h3>
+<!---<button id="loginBtn" onclick="login()">Logout?</button>-->
+<div id="loggedPage">
+</div>
+
+<script>
+    renderPage()
+
+    function sendMsg(){
+    	var message = $("#textMsg").val()
+    	if(message != ""){
+            $.ajax({
+                type: "POST",
+                url: "/message",
+                datatype: "json",
+                contentType: "application/json",
+                data: JSON.stringify({ 'message':message,'lat':0,'lon':0 }),
+                success: function (data) {
+                	console.log("On sending message:", data)
+                    $("#textMsg").val('')
+                }
+
+            })
+        }
+    } 
+
+    function renderPage(){
+        $("#loggedPage").append("Current location: ")
+        $("#loggedPage").append("<input id='lat' placeholder='lat'/>")
+        $("#loggedPage").append("<input id='lon' placeholder='lon'/><br><br>")
+        $("#loggedPage").append("Current range: ")
+        $("#loggedPage").append("<input id='range' value='10' />")
+        $("#loggedPage").append("<button id='changeRange' onclick='updateRange()'>Update Range</button><br><br>")
+        $("#loggedPage").append("Users in range and in building:<br><br>")
+        $("#loggedPage").append("<textarea readonly id='inRange' rows=10 cols=60></textarea><br>")
+        $("#loggedPage").append("<button id='getUsers' onclick='getUsersInRangeAndInBuilding()'>Check who is nearby</button><br><br>")
+        $("#loggedPage").append("Received Messages:<br><br>")
+    	$("#loggedPage").append("<textarea readonly id='receivedMsgs' rows=15 cols=60></textarea><br>")
+    	$("#loggedPage").append("<textarea id='textMsg' rows=4 cols=60 placeholder='Send message ...'></textarea><br>")
+    	$("#loggedPage").append("<button id='send' onclick='sendMsg()'>Send</button>")
+    }
+
+    (function getMessages() {
+      $.ajax({
+        type: "POST",
+        url: '/secret/{{istID}}', 
+        success: function(data) {
+            console.log(data)
+            $("#receivedMsgs").val(data)//data["message"])
+        },
+        complete: function() {
+            // Schedule the next request when the current one's complete
+            setTimeout(getMessages, 1000);
+        }
+      });
+    })();
+
+</script>
+
+</body>
+</html>

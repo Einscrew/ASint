@@ -60,11 +60,11 @@ def login_required(f):
 		print('COOKIE IN REQUEST?:', cookie)
 		if cookie == None or cookie != cache.get('access_token'):#or 'username' not in session:#c is None:
 			cache.clear()
-			request.get('https://id.tecnico.ulisboa.pt/cas/logout')
-			return redirect(APP['loginURI'])
+			return redirect('https://id.tecnico.ulisboa.pt/cas/logout')#APP['loginURI'])
 		if cache.get('username') not in kwargs.values(): #and cookie != session['username']:
 			cache.clear()
-			return abort(401)#redirect('/login',302)#Response('Credentials required!', 302, {'WWW-Authenticate': 'Basic realm="Login!"','Location':'http://127.0.0.1:5000/'})
+			return redirect('https://id.tecnico.ulisboa.pt/cas/logout')#APP['loginURI'])
+			#return abort(401)#redirect('/login',302)#Response('Credentials required!', 302, {'WWW-Authenticate': 'Basic realm="Login!"','Location':'http://127.0.0.1:5000/'})
 			#return Response(make_response('/login'), 302)#APP['loginURI'])
 
 		return f(*args, **kwargs)

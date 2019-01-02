@@ -46,7 +46,7 @@ class Db():
 	def getUserBuilding(self, istID):
 		user = self.db['users'].find_one({'_id': istID})
 		allBuildings = self.db['buildings'].find()
-		inBuilding= lambda u1,u2: geo.distance(u1['location'],u2['location']) < 50
+		inBuilding= lambda u1,u2: geo.distance({'lat':u1['lat'],'lon':u1['lon']},{'lat':u2['lat'],'lon':u2['lon']}) < 50
 		for building in allBuildings:
 			if inBuilding(user, building):
 				self.db['users'].update_one({'_id': istID}, {'$set': {'building': building['_id']}}) 
