@@ -23,7 +23,7 @@ def login_required(f):
 @app.before_request
 def before_request():
     print("before callllldddd")
-    if 'username' in session and request.endpoint == 'message':
+    if 'username' in session and request.endpoint == 'message': 
         session.permanent = True
         app.permanent_session_lifetime = datetime.timedelta(minutes=1)
         session.modified = True

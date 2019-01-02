@@ -31,7 +31,7 @@ with open("../secret", 'rb') as f:
 APP['redirectURI'] = 'http://127.0.0.1:5000/'
 APP['loginURI'] = 'https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id='+str(APP['clientID'])+'&redirect_uri='+APP['redirectURI']
 
-@app.after_request
+'''@app.after_request
 def add_header(response):
 	"""
 	Add headers to both force latest IE rendering engine or Chrome Frame,
@@ -39,7 +39,7 @@ def add_header(response):
 	"""
 	response.headers['X-UA-Compatible'] = 'IE=Edge,chrome=1'
 	response.headers['Cache-Control'] = 'public, max-age=0'
-	return response
+	return response'''
 
 def validAdmin(username, password):
 	return username == app.config['USER'] and password == app.config['PASS']
@@ -52,6 +52,24 @@ def admin(f):
 			return Response('Credentials required!', 401, {'WWW-Authenticate': 'Basic realm="Login!"'})
 		return f(*args, **kwargs)
 	return wrapper
+
+
+def validBot(user, key):
+	if user != "bot":
+		return False
+
+	print(db.getBot(key))
+	return (False if db.getBot(key) == None else True)
+
+def bot(f):
+	@wraps(f)
+	def wrapper(*args, **kwargs):
+		auth = request.authorization
+		if not auth.username or not auth.password or not validBot(auth.username, auth.password):
+			return Response('Valid key required!', 401, {'WWW-Authenticate': 'Basic realm="Login!"'})
+		return f(*args, **kwargs)
+	return wrapper
+
 
 def login_required(f):
 	@wraps(f)
@@ -117,6 +135,7 @@ def history():
 
 #history by building
 @app.route('/API/admin/building/<string:buildingID>/logs', methods=['POST'])
+@admin
 def historyByBuilding(buildingID, moves=True, messages=True):
 	#return 'by building'
 	if moves:
@@ -137,6 +156,7 @@ def historyByBuilding(buildingID, moves=True, messages=True):
 
 #history by user
 @app.route('/API/admin/users/<string:istID>/logs', methods=['POST'])
+@admin
 def historyByUser(istID, moves=True, messages=True):
 	#return 'by user'
 	if moves:
@@ -156,11 +176,12 @@ def historyByUser(istID, moves=True, messages=True):
 	return str(logs)
 
 #create new bot
-@app.route('/API/admin/bot/create/<string:buildingID>', methods=['PUT'])
+@app.route('/API/admin/bot/create', methods=['PUT'])
 @admin
-def newBot(buildingID):
-	r = db.insertBot(buildingID)
-	return jsonify( { 'key':r, 'building':buildingID})
+def newBot():
+	b = request.form['buildings'].split(',')
+	r = db.insertBot(b)
+	return jsonify({ 'key':r })
 
 
 '''USER ENDPOINTS'''
@@ -220,11 +241,11 @@ def usersInRange(istID):
 		abort(json(message="something went wrong"))
 	return "ok"
 
-#List users in range
+#List messages received
 @app.route('/API/users/<string:istID>/message/received', methods=['POST'])
-@login_required
+#@login_required
 def received(istID):
-	print('COOKIE IN REQUEST?:', request.cookies.get('access_token'))
+	#print('COOKIE IN REQUEST?:', request.cookies.get('access_token'))
 	return jsonify(db.getUserMessages(istID))
 
 #Updates user's building
@@ -235,6 +256,18 @@ def updateBuilding(istID):
 
 
 '''BOTS ENDPOINTS'''
+@app.route('/API/bots/<string:key>/message', methods=['POST'])
+@bot
+def dissipateMessage(key):
+	if key != request.authorization.password:
+		return Response('Endpoint not allowed!', 401)
+	
+	buildings = db.getBot(key)
+	r = 0
+	for buildingID in buildings:
+		r = r + db.insertMessageInBuilding('Bot', request.data, buildingID)
+
+	return 'Sending complete ('+str(r)+')'
 
 
 

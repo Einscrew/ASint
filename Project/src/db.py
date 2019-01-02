@@ -1,4 +1,5 @@
 import pymongo
+from bson import ObjectId
 from datetime import datetime
 import geo
 
@@ -9,6 +10,7 @@ class Db():
 	def __init__(self, conn=connString, dbName='asint'):
 		self.client = pymongo.MongoClient(conn)
 		self.db = self.client[dbName]
+		self.bots = self.db['bots']
 	
 	#________________________________________________________________________
 	#### Users ####
@@ -94,6 +96,19 @@ class Db():
 
 	#________________________________________________________________________
 	#### Messages ####
+	def insertMessageInBuilding(self, src, msg, buildingID):
+		dest = self.db['users'].find({'building': {'$eq':buildingID}})
+		r = dest.count()
+		if r > 0:
+			s = self.getBuildings(id = buildingID)
+			if len(s) == 1:
+				self.db['messages'].insert_one({'src': src, 'dst': [ d['_id'] for d in dest ], 
+												'content': msg, 
+												'location': s[0]['location'], 
+												'building': buildingID ,
+												'time': datetime.now()})
+		return r
+
 	def insertMessage(self, src, dest, msg, location, buildingID):
 		try:
 			self.db['messages'].insert_one({'src': src, 'dst': dest, 'content': msg, 'location': location, 'building': buildingID ,'time': datetime.now()})
@@ -104,7 +119,7 @@ class Db():
 
 	def getUserMessages(self, user):	
 		try:
-			r = [ [i['src'],i['content'], i['time']] for i in self.db['messages'].find({'dst': user})].sort(key=lambda e: e[2])
+			r = [ [i['src'],i['content'], i['time']] for i in self.db['messages'].find({'dst': user})]#.sort(key=lambda e: e[2])
 			print(r)
 			return r#excludes destiny from the result
 		except:
@@ -120,29 +135,48 @@ class Db():
 	#### Buildings ####
 	def insertBuildings(self, buildingsList):
 		try:
-			#self.db["buildings"].drop()
+			self.removeBuildings()
 			self.db["buildings"].insert_many(buildingsList)
 			return True
 		except:
 			print('Error inserting movement')
 			return False
 
-	def getBuildings(self):
-		s = self.db["buildings"].find({},{'_id':0})
+	def getBuildings(self, id = None):
+		if id is not None:
+			s = self.db["buildings"].find({'_id':{'$eq':id}})
+		else:
+			s = self.db["buildings"].find()
 		return list(s)
+
+	def removeBuildings(self):
+		self.db["buildings"].drop()
 
 	#________________________________________________________________________
 	#### Bots ####
-	def insertBot(self, id):
+	def insertBot(self, ids):
+		print(ids)
+		return self.db['bots'].insert_one({'building':ids}).inserted_id.binary.hex()
+	
+		print('Error inserting Bot')
+		return False
+
+	def getBot(self, id):	
 		try:
-			return db['bots'].insert_one({'building':id}).inserted_id.binary
+			i = self.db['bots'].find({'_id':ObjectId(id)})
+			#print('<<<<<',[*i])
+			if i.count() != 0:
+				return i.next()['building']
+			else:
+				return None
 		except:
-			print('Error inserting Bot')
-			return False
+			print("Error searching for bot",id)
+			return None
+
 
 	def deleteBot(self, k):
 		try:
-			db['bots'].delete_one({'key':k})
+			self.db['bots'].delete_one({'key':k})
 			return True
 		except:
 			return False
