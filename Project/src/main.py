@@ -20,11 +20,11 @@ cache = SimpleCache()
 
 db = db.Db()
 
-with open("../keys.json",'r') as f:
+with open("keys.json",'r') as f:
 	APP = json.load(f)
 
 
-with open("../secret", 'rb') as f:
+with open("secret", 'rb') as f:
 	app.secret_key = f.read()
 
 
