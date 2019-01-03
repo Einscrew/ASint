@@ -24,8 +24,8 @@ with open("keys.json",'r') as f:
 	APP = json.load(f)
 
 
-with open("secret", 'rb') as f:
-	app.secret_key = f.read()
+'''with open("secret.jpg", 'rb') as f:
+	app.secret_key = f.read()'''
 
 
 APP['redirectURI'] = 'http://127.0.0.1:5000/'
