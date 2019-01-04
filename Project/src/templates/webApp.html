@@ -13,7 +13,7 @@
 
 <script>
     renderPage()
-
+    var pos, numberMessages = 0
     function sendMsg(){
     	var message = $("#textMsg").val()
     	if(message != ""){
@@ -22,7 +22,7 @@
                 url: "/API/users/{{istID}}/message",
                 datatype: "json",
                 contentType: "application/json",
-                data: JSON.stringify({ 'message':message,'lat':0,'lon':0 }),               
+                data: JSON.stringify({ 'message':message,'location':pos}),
                 success: function (data) {
                     console.log("On sending message:", data)
                     $("#textMsg").val('')
@@ -33,6 +33,7 @@
     } 
 
     function renderPage(){
+        $("#loggedPage").append("<button onclick='logout()'>Logout</button>")
         $("#loggedPage").append("Current location: ")
         $("#loggedPage").append("<input id='lat' placeholder='lat'/>")
         $("#loggedPage").append("<input id='lon' placeholder='lon'/><br><br>")
@@ -48,19 +49,29 @@
     	$("#loggedPage").append("<button id='send' onclick='sendMsg()'>Send</button>")
     }
 
+    function logout(){
+        $.ajax({
+        type: "POST",
+        url: '/logout',
+        success:function(data) {
+            window.close()
+        }
+      });
+    }
+
     (function getMessages() {
       $.ajax({
         type: "POST",
-        url: 'API/users/{{istID}}/message/received',
+        url: '/API/users/{{istID}}/message/received',
+        data: JSON.stringify({'number':numberMessages}),
+        contentType: "application/json",
         success:function(data) {
-            console.log('ok')
-            $("#receivedMsgs").val(data)//data["message"])
+            console.log('ok '+data.length+' messages ('+numberMessages+')')
+            numberMessages += data.length
+            if(data.length > 0)
+                $("#receivedMsgs").append(data.join('\n')+'\n')//data["message"])
             setTimeout(getMessages, 1000);
-        },
-        error:function(){
-            window.location.reload()
         }
-
       });
     })();
 
@@ -72,18 +83,19 @@
 
     function showPosition(position) {
         console.log('User position has changed')
+        pos = {'lat': position.coords.latitude , 'lon': position.coords.longitude}
         $.ajax({
             type: "POST",
-            url: 'API/users/{{istID}}/location',
+            url: '/API/users/{{istID}}/location',
             datatype: "json",
             contentType: "application/json",
-            data: JSON.stringify({ 'lat': position.coords.latitude , 'lon': position.coords.longitude}),
+            data: JSON.stringify(pos),
             success: function(data) {
-                $('#lat').val(Math.round(position.coords.latitude * 100) / 100)
-                $('#lon').val(Math.round(position.coords.longitude * 100) / 100)
+                $('#lat').val(Math.round(position.coords.latitude * 1000) / 1000)
+                $('#lon').val(Math.round(position.coords.longitude * 1000) / 1000)
             },
             complete: function() {
-                updateUserBuilding()
+                console.log('position send')
             }
         });
     }
@@ -91,7 +103,7 @@
     (function getUsersInRangeAndInBuilding(){
         $.ajax({
             type: "POST",
-            url: 'API/users/{{istID}}/range',
+            url: '/API/users/{{istID}}/range',
             success: function(data) {
                 console.log(data)
                 $("#inRange").val(data['users'])
@@ -106,19 +118,9 @@
     function updateRange() {
         $.ajax({
             type: "POST",
-            url: 'API/users/{{istID}}/range/' + $('#range').val(),
+            url: '/API/users/{{istID}}/range/' + $('#range').val(),
             success: function(data) {
                 console.log('Range updated')
-            }
-        });
-    }
-
-    function updateUserBuilding(){
-        $.ajax({
-            type: "POST",
-            url: 'API/users/{{istID}}/building',
-            success: function(data) {
-                console.log('Building updated')
             }
         });
     }

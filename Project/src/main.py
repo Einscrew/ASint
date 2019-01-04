@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from flask import Flask, Response, abort, make_response, render_template, request, jsonify, redirect, url_for
+from flask import Flask, Response, abort, make_response, render_template, request, jsonify, redirect, url_for, session
 from itertools import chain
 import db
 
@@ -49,7 +49,7 @@ def admin(f):
 	def wrapper(*args, **kwargs):
 		auth = request.authorization
 		if not auth.username or not auth.password or not validAdmin(auth.username, auth.password):
-			return Response('Credentials required!', 401, {'WWW-Authenticate': 'Basic realm="Login!"'})
+			return Response('Credentials required!', 500, {'WWW-Authenticate': 'Basic realm="Login!"'})
 		return f(*args, **kwargs)
 	return wrapper
 
@@ -66,7 +66,7 @@ def bot(f):
 	def wrapper(*args, **kwargs):
 		auth = request.authorization
 		if not auth.username or not auth.password or not validBot(auth.username, auth.password):
-			return Response('Valid key required!', 401, {'WWW-Authenticate': 'Basic realm="Login!"'})
+			return Response('Valid key required!', 500, {'WWW-Authenticate': 'Basic realm="Login!"'})
 		return f(*args, **kwargs)
 	return wrapper
 
@@ -74,17 +74,11 @@ def bot(f):
 def login_required(f):
 	@wraps(f)
 	def decorated_function(*args, **kwargs):
-		cookie = request.cookies.get('access_token')
-		print('COOKIE IN REQUEST?:', cookie)
-		if cookie == None or cookie != cache.get('access_token'):#or 'username' not in session:#c is None:
-			cache.clear()
-			return redirect('https://id.tecnico.ulisboa.pt/cas/logout')#APP['loginURI'])
-		if cache.get('username') not in kwargs.values(): #and cookie != session['username']:
-			cache.clear()
-			return redirect('https://id.tecnico.ulisboa.pt/cas/logout')#APP['loginURI'])
-			#return abort(401)#redirect('/login',302)#Response('Credentials required!', 302, {'WWW-Authenticate': 'Basic realm="Login!"','Location':'http://127.0.0.1:5000/'})
-			#return Response(make_response('/login'), 302)#APP['loginURI'])
-
+		user = session.get('username')
+		if user is None:
+			return redirect(APP['loginURI'])
+		if user not in kwargs.values():
+			return abort(401) #unauthorized
 		return f(*args, **kwargs)
 	return decorated_function
 
@@ -186,6 +180,7 @@ def newBot():
 
 '''USER ENDPOINTS'''
 @app.route('/API/login/', methods=['POST'])
+@login_required
 def fenixLogin():
 	return jsonify({"istID":'2iwi2kd'})
 	#User(1234)
@@ -194,62 +189,63 @@ def fenixLogin():
 
 #Send Message
 @app.route('/API/users/<string:istID>/message', methods=['POST'])
+@login_required
 def sendMsg(istID):
 	try:
 		print(request.is_json)
 		d = request.get_json()
-		return str(db.insertMessage(istID, db.getUsersInRange(istID), d['message'], {'lat':d['lat'],'lon':d['lon']}, None))
+		return str(db.insertMessage(istID, [*db.getUsersInRange(istID)], d.get('message'), d.get('location'), None))
 	except:
-		abort(json(message="something went wrong"))
-	return "ok"
+		return abort(500)
 
 #Set Range
 @app.route('/API/users/<string:istID>/range/<int:newRange>',methods=['POST'])
+@login_required
 def setRange(istID, newRange):
 	try:
 		print(request.is_json)
 		d = request.get_json()
 		return str(db.updateUserRange(istID, newRange))
 	except:
-		abort(json(message="something went wrong"))
-	return "ok"	
+		return abort(500)
 
 #Update user's location
 @app.route('/API/users/<string:istID>/location',methods=['POST'])
+@login_required
 def updateLocation(istID):
 	try:
 		print(request.is_json)
 		d = request.get_json()
-		print(d)
-		db.updateUserLocation(istID,{'lat': d['lat'], 'lon': d['lon']})
+		db.updateUserLocation(istID,d)
 	except:
-		abort(json(message="something went wrong"))
+		return abort(500)
 	return "ok"
 
 #List users in range
 @app.route('/API/users/<string:istID>/range', methods=['POST'])
+@login_required
 def usersInRange(istID):
 	try:		
 		users = db.getUsersInRange(istID)
 		usersInBuilding = db.getUsersInSameBuilding(istID)
 		if usersInBuilding != None:
 			users.union(usersInBuilding)
-		s = "\n"
-		seq = (u for u in users)
-		return jsonify({'users': s.join(seq)})
+		return jsonify({'users': "\n".join(users)})
 	except:
-		abort(json(message="something went wrong"))
-	return "ok"
+		return abort(500)
 
 #List messages received
 @app.route('/API/users/<string:istID>/message/received', methods=['POST'])
-#@login_required
+@login_required
 def received(istID):
-	#print('COOKIE IN REQUEST?:', request.cookies.get('access_token'))
-	return jsonify(db.getUserMessages(istID))
+	i = 0
+	if request.is_json:
+		i = int(request.get_json()['number'])
+	return jsonify(db.getUserMessages(istID, lastIndex = i))
 
 #Updates user's building
 @app.route('/API/users/<string:istID>/building', methods=['POST'])
+@login_required
 def updateBuilding(istID):
 	db.getUserBuilding(istID)
 	return "ok"
@@ -260,7 +256,7 @@ def updateBuilding(istID):
 @bot
 def dissipateMessage(key):
 	if key != request.authorization.password:
-		return Response('Endpoint not allowed!', 401)
+		return Response('Endpoint not allowed!', 500)
 	
 	buildings = db.getBot(key)
 	r = 0
@@ -279,25 +275,36 @@ def dissipateMessage(key):
 @app.route('/')
 def hello_world():
 	code = request.args.get('code')
-	print(cache)
-	#	input('fdssss	')
 
-	if code is None and cache.get('access_token') is None:
+	if code is None and not session.get('code'):
 		return redirect(APP['loginURI'])
 
-	elif code is not None and cache.get('access_token') is None:
-		cache.add('username',getUserInfo(code),timeout = 5)
+	elif code is not None and not session.get('token'):
+		#cache.add('username',getUserInfo(),timeout = 5)
+		session['code'] = code
+		getUserInfo()
 		return redirect('/')
 	
-	db.insertUser(cache.get('username'), {'lat':12,'lon':241}, 10)
-	resp = make_response(render_template("webApp.html", istID=cache.get('username')))
-
-	resp.set_cookie('access_token', cache.get('access_token'))#, expires=(datetime.datetime.now()+datetime.timedelta(seconds=30)))	
+	db.insertUser(session.get('username'), {'lat':0,'lon':0}, 10)
+	resp = make_response(render_template("webApp.html", istID=session.get('username')))
+	#resp.set_cookie('access_token', cache.get('access_token'))#
 	return resp
 
-@app.route('/logout')
-def logout(istID):
-	db.removeUser(istID)
+@app.route('/testing/<string:istID>')
+def testing(istID):
+	session['username'] = istID
+	db.insertUser(session.get('username'), {'lat':0,'lon':0}, 10)
+	return render_template("webApp.html", istID=session.get('username'))
+
+
+@app.route('/logout', methods = ['POST'])
+@login_required
+def logout():
+	#db.removeUser(istID)
+	print(session)	
+	session.clear()
+	print(session)
+	return redirect('/login')
 	#Here redirect to login page again
 	#return render_template("webApp.html", istID)
 
@@ -306,20 +313,23 @@ def log():
 	return render_template("mainPage.html")
 
 
-def getUserInfo(code):
+def getUserInfo():
     access_token_request_url = 'https://fenix.tecnico.ulisboa.pt/oauth/access_token'
     request_data = {'client_id': int(APP['clientID']), 'client_secret': APP['clientSecret'],
-            'redirect_uri': APP['redirectURI'], 'code': code, 'grant_type': 'authorization_code'}
+            'redirect_uri': APP['redirectURI'], 'code': session.get('code'), 'grant_type': 'authorization_code'}
 
     reqAccessToken = requests.post(access_token_request_url, data=request_data)
 
     token = reqAccessToken.json().get('access_token')
-    cache.add('access_token', token, timeout=5)
-    print('access token in cache',cache.get('access_token'))
+    session['token'] = token
+    #cache.add('access_token', token, timeout=5)
+    #print('access token in cache',cache.get('access_token'))
 
 
     request_info = requests.get('https://fenix.tecnico.ulisboa.pt/api/fenix/v1/person', params={'access_token': token})
-    return request_info.json().get('username')
+    session['username'] = request_info.json().get('username')
+    return
+
 
 if __name__ == '__main__':
 	app.run()

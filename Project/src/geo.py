@@ -3,14 +3,14 @@ from math import sin, cos, sqrt, atan2, radians
 def distance(l1: dict,l2: dict):
 	R = 6373000 #m
 	loc1 = dict()
-	loc2 = dict()
+	loc2 = dict()			
 	loc1["lat"] = radians(l1["lat"])
 	loc1["lon"] = radians(l1["lon"])
 
 
 	loc2["lat"] = radians(l2["lat"])
 	loc2["lon"] = radians(l2["lon"])
-	
+
 	dlon = loc2["lon"] - loc1["lon"]
 	dlat = loc2["lat"] - loc1["lat"]
 

@@ -16,10 +16,10 @@ class Db():
 	#### Users ####
 	def insertUser(self, istID, location, myRange):
 		try:
-			self.db['users'].insert_one({'_id': istID, 'location': location, 'range': myRange, 'building': None})
+			self.db['users'].insert_one({'_id': istID, 'location': location, 'range': myRange, 'building': None})#update_one({'_id': istID}, {'_id': istID, 'location': location, 'range': myRange, 'building': None},upsert=True)
 			return True
-		except:
-			print('Error inserting user')
+		except pymongo.errors.DuplicateKeyError:
+			print('Error inserting user, because already exists')
 			return False
 
 	def removeUser(self, istID):
@@ -50,7 +50,7 @@ class Db():
 	def getUserBuilding(self, istID):
 		user = self.db['users'].find_one({'_id': istID})
 		allBuildings = self.db['buildings'].find()
-		inBuilding= lambda u1,u2: geo.distance({'lat':u1['lat'],'lon':u1['lon']},{'lat':u2['lat'],'lon':u2['lon']}) < 50
+		inBuilding= lambda u1,u2: geo.distance(u1['location'],u2['location']) < 50
 		for building in allBuildings:
 			if inBuilding(user, building):
 				self.db['users'].update_one({'_id': istID}, {'$set': {'building': building['_id']}}) 
@@ -102,25 +102,31 @@ class Db():
 		if r > 0:
 			s = self.getBuildings(id = buildingID)
 			if len(s) == 1:
-				self.db['messages'].insert_one({'src': src, 'dst': [ d['_id'] for d in dest ], 
-												'content': msg, 
-												'location': s[0]['location'], 
-												'building': buildingID ,
-												'time': datetime.now()})
+				self.insertMessage({'src': src,
+									'dst': [ d['_id'] for d in dest ], 
+									'content': msg, 
+									'location': s[0]['location'], 
+									'building': buildingID ,
+									'time': datetime.now()})
 		return r
 
 	def insertMessage(self, src, dest, msg, location, buildingID):
 		try:
-			self.db['messages'].insert_one({'src': src, 'dst': dest, 'content': msg, 'location': location, 'building': buildingID ,'time': datetime.now()})
+			self.db['messages'].insert_one({'src': src, 
+											'dst': dest,
+											'content': msg, 
+											'location': location, 
+											'building': buildingID,
+											'time': datetime.now()})
 			return True
 		except:
 			print('Error inserting message')
 			return False
 
-	def getUserMessages(self, user):	
+	def getUserMessages(self, user, lastIndex=0):
+		lastIndex = lastIndex if lastIndex > 0 else 0
 		try:
-			r = [ [i['src'],i['content'], i['time']] for i in self.db['messages'].find({'dst': user})]#.sort(key=lambda e: e[2])
-			print(r)
+			r = [ [i['src'],i['content'], i['time']] for i in self.db['messages'].find({'dst': user}).skip(lastIndex)]#.sort(key=lambda e: e[2])
 			return r#excludes destiny from the result
 		except:
 			print('Error getting messages')
@@ -155,16 +161,15 @@ class Db():
 	#________________________________________________________________________
 	#### Bots ####
 	def insertBot(self, ids):
-		print(ids)
-		return self.db['bots'].insert_one({'building':ids}).inserted_id.binary.hex()
-	
-		print('Error inserting Bot')
-		return False
+		try:
+			return self.db['bots'].insert_one({'building':ids}).inserted_id.binary.hex()
+		except:
+			print('Error inserting Bot')
+			return False
 
 	def getBot(self, id):	
 		try:
 			i = self.db['bots'].find({'_id':ObjectId(id)})
-			#print('<<<<<',[*i])
 			if i.count() != 0:
 				return i.next()['building']
 			else:
