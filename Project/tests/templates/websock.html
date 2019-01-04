@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebApp</title>
+    <script src ="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+</head>
+<body>
+
+<!---<button id="loginBtn" onclick="login()">Logout?</button>-->
+<div id="loggedPage">
+</div>
+
+<script>
+    renderPage()
+    function renderPage(){
+        $("#loggedPage").append("Received Messages:<br><br>")
+    	$("#loggedPage").append("<textarea readonly id='receivedMsgs' rows=15 cols=60></textarea><br>")
+    	$("#loggedPage").append("<textarea id='textMsg' rows=4 cols=60 placeholder='Send message ...'></textarea><br>")
+    	$("#loggedPage").append("<button id='send' onclick='sendMsg()'>Send</button>")
+    }
+    
+</script>
+
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+<script type="text/javascript" charset="utf-8">
+    var socket = io.connect('http://' + document.domain + ':' + location.port)
+    console.log(socket)
+    socket.on('connect', function() {
+        socket.emit('my event', {data: 'I\'m connected!', id: socket.id})
+    })
+    socket.on('receivedMsgs', function(data){
+    	console.log(data)
+    	$("#receivedMsgs").val(data)//data["message"])
+    })
+</script>
+
+</body>
+</html>
