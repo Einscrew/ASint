@@ -314,21 +314,29 @@ def log():
 
 
 def getUserInfo():
-    access_token_request_url = 'https://fenix.tecnico.ulisboa.pt/oauth/access_token'
-    request_data = {'client_id': int(APP['clientID']), 'client_secret': APP['clientSecret'],
-            'redirect_uri': APP['redirectURI'], 'code': session.get('code'), 'grant_type': 'authorization_code'}
+	try:			
+		access_token_request_url = 'https://fenix.tecnico.ulisboa.pt/oauth/access_token'
+		request_data = {'client_id': int(APP['clientID']), 'client_secret': APP['clientSecret'],
+				'redirect_uri': APP['redirectURI'], 'code': session['code'], 'grant_type': 'authorization_code'}
 
-    reqAccessToken = requests.post(access_token_request_url, data=request_data)
+		reqAccessToken = requests.post(access_token_request_url, data=request_data)
 
-    token = reqAccessToken.json().get('access_token')
-    session['token'] = token
-    #cache.add('access_token', token, timeout=5)
-    #print('access token in cache',cache.get('access_token'))
+		token = reqAccessToken.json()['access_token']
+		session['token'] = token
+		#cache.add('access_token', token, timeout=5)
+		#print('access token in cache',cache.get('access_token'))
 
 
-    request_info = requests.get('https://fenix.tecnico.ulisboa.pt/api/fenix/v1/person', params={'access_token': token})
-    session['username'] = request_info.json().get('username')
-    return
+		request_info = requests.get('https://fenix.tecnico.ulisboa.pt/api/fenix/v1/person', params={'access_token': token})
+
+		if request_info.status_code != 200 and reqAccessToken.status_code != 200:
+			session.clear()
+			return False
+		session['username'] = request_info.json()['username']
+	except KeyError:
+		session.clear()
+		return False
+	return True
 
 
 if __name__ == '__main__':
