@@ -20,15 +20,15 @@ cache = volatileSet()
 
 db = db.Db()
 
-with open("../keys.json",'r') as f:
+with open("keys.json",'r') as f:
 	APP = json.load(f)
 
 
-with open("../secret", 'rb') as f:
+with open("secret", 'rb') as f:
 	app.secret_key = f.read()
 
 
-APP['redirectURI'] = 'http://127.0.0.1:5000/'
+APP['redirectURI'] = 'https://asint-2018.appspot.com/'
 APP['loginURI'] = 'https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id='+str(APP['clientID'])+'&redirect_uri='+APP['redirectURI']
 
 @app.after_request
@@ -123,8 +123,6 @@ def listUsers():
 @app.route('/API/admin/buildings/<string:buildingID>/users', methods=['POST'])
 @admin
 def listUsersInBuilding(buildingID):
-	cache.add('ist192881')
-	cache.add('ist190111')
 	usersInBuilding = db.getUsersInSameBuilding({'building':buildingID}, allusers = cache.getAll())
 	return jsonify({'users':list(usersInBuilding)})
 
@@ -230,8 +228,7 @@ def setRange(istID, newRange):
 def updateLocation(istID):
 	try:
 		d = request.get_json()
-		print(d)	
-		db.updateUserLocation(istID,{ "lat": 38.7368098, "lon": -9.1397191})
+		db.updateUserLocation(istID,d)
 	except:
 		print('Error update location')
 		return abort(500)
