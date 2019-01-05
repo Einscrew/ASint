@@ -34,14 +34,10 @@ class Db():
 			return False
 
 	def updateUserLocation(self, istID, location):
-		print('user update')
-		self.db['users'].update_one({'_id': istID}, {'$set': {'location': location}})
-		print('location done')
-		b = self.getUserBuilding(istID)
-		print('user in',b)
-		self.insertMovement(istID, location, b)
-		print('inserting Movements')
-		try:			
+		try:
+			self.db['users'].update_one({'_id': istID}, {'$set': {'location': location}})
+			b = self.getUserBuilding(istID)
+			self.insertMovement(istID, location, b)
 			return True
 		except:
 			print('Error changing user location')

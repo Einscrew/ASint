@@ -117,7 +117,7 @@ def listLoggedUsers():
 @app.route('/API/admin/users', methods=['POST'])
 @admin
 def listUsers():
-	return str(db.getUsers())
+	return jsonify(db.getUsers())
 
 #Logged Users In building
 @app.route('/API/admin/buildings/<string:buildingID>/users', methods=['POST'])
