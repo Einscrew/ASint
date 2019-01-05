@@ -38,7 +38,7 @@
         $("#loggedPage").append("<input id='lat' placeholder='lat'/>")
         $("#loggedPage").append("<input id='lon' placeholder='lon'/><br><br>")
         $("#loggedPage").append("Current range: ")
-        $("#loggedPage").append("<input id='range' value='10' />")
+        $("#loggedPage").append("<input id='range' value='{{range}}' />")
         $("#loggedPage").append("<button id='changeRange' onclick='updateRange()'>Update Range</button><br><br>")
         $("#loggedPage").append("Users in range and in building:<br><br>")
         $("#loggedPage").append("<textarea readonly id='inRange' rows=10 cols=60></textarea><br>")

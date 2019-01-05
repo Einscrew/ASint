@@ -20,10 +20,10 @@ class Db():
 	def insertUser(self, istID, location, myRange):
 		try:
 			self.db['users'].insert_one({'_id': istID, 'location': location, 'range': myRange, 'building': None})#update_one({'_id': istID}, {'_id': istID, 'location': location, 'range': myRange, 'building': None},upsert=True)
-			return True
+			return myRange
 		except pymongo.errors.DuplicateKeyError:
 			print('Error inserting user, because already exists')
-			return False
+			return self.db['users'].find_one({'_id': istID}).get('range')
 
 	def removeUser(self, istID):
 		try:
@@ -37,9 +37,7 @@ class Db():
 		print('user update')
 		self.db['users'].update_one({'_id': istID}, {'$set': {'location': location}})
 		print('location done')
-		b = self.getUserBuilding(istID)
-		print('user in',b)
-		self.insertMovement(istID, location, b)
+		self.insertMovement(istID, location, self.getUserBuilding(istID))
 		print('inserting Movements')
 		try:			
 			return True
