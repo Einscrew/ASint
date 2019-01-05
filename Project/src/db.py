@@ -57,10 +57,6 @@ class Db():
 				return True
 		return False
 
-
-	def getAllLoggedUsers(self):
-		return self.db['users'].find()
-
 	def getUsersInRange(self, istID):
 		u = self.db['users'].find_one({'_id':istID})
 		inRange = lambda u1,u2: geo.distance(u1['location'],u2['location']) < u1['range']
@@ -69,14 +65,27 @@ class Db():
 
 		return set(user['_id'] for user in allusers if user['_id'] != istID and inRange(u,user))
 
-	def getUsersInSameBuilding(self, istID):
-		user = self.db['users'].find_one({'_id': istID})
-		allusers = self.db['users'].find()
+	def getUsersInSameBuilding(self, filter, allusers=None):
 
-		if user['building'] != None:
-			return set(u['_id'] for u in allusers if u['_id'] != istID and u['building'] == user['building'])
+		if not allusers:
+			allusers = self.db['users'].find()
+			if building != None:
+				return set(u['_id'] for u in allusers if u['_id'] != istID and u['building'] == user['building'])
+
+		istID = filter.get('istID')
+		if istID:
+			user = self.db['users'].find_one({'_id': istID})
+			building = user['building']
+
+		else:
+			building = filter.get('building')
+
+		users = self.db['users'].find({'_id':{'$in':allusers}})
+		if building != None:
+			return set(u['_id'] for u in users if u['_id'] != istID and u['building'] == building)
 		else:
 			return None
+
 
 	#________________________________________________________________________
 	#### Movements ####

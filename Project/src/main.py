@@ -3,7 +3,7 @@ from flask import Flask, Response, abort, make_response, render_template, reques
 from itertools import chain
 import db
 
-from werkzeug.contrib.cache import SimpleCache
+from cacheSet import volatileSet
 
 from functools import wraps
 
@@ -16,7 +16,7 @@ import datetime
 app = Flask(__name__)
 app.config.from_pyfile('settings')
 
-cache = SimpleCache()
+cache = volatileSet()
 
 db = db.Db()
 
@@ -31,7 +31,7 @@ with open("../secret", 'rb') as f:
 APP['redirectURI'] = 'http://127.0.0.1:5000/'
 APP['loginURI'] = 'https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id='+str(APP['clientID'])+'&redirect_uri='+APP['redirectURI']
 
-'''@app.after_request
+@app.after_request
 def add_header(response):
 	"""
 	Add headers to both force latest IE rendering engine or Chrome Frame,
@@ -39,7 +39,7 @@ def add_header(response):
 	"""
 	response.headers['X-UA-Compatible'] = 'IE=Edge,chrome=1'
 	response.headers['Cache-Control'] = 'public, max-age=0'
-	return response'''
+	return response
 
 def validAdmin(username, password):
 	return username == app.config['USER'] and password == app.config['PASS']
@@ -70,7 +70,6 @@ def bot(f):
 		return f(*args, **kwargs)
 	return wrapper
 
-
 def login_required(f):
 	@wraps(f)
 	def decorated_function(*args, **kwargs):
@@ -79,6 +78,7 @@ def login_required(f):
 			return redirect(APP['loginURI'])
 		if user not in kwargs.values():
 			return abort(401) #unauthorized
+		cache.add(user, timeout= datetime.timedelta(seconds = 5))
 		return f(*args, **kwargs)
 	return decorated_function
 
@@ -111,15 +111,16 @@ def buildingsList():
 @app.route('/API/admin/users/loggedin', methods=['POST'])
 @admin
 def listLoggedUsers():
-	users = db.getAllLoggedUsers()
-	for user in users:
-		print(user)
+	return str(cache.getAll())
 
 #Logged Users In building
 @app.route('/API/admin/buildings/<string:buildingID>/users', methods=['POST'])
 @admin
 def listUsersInBuilding(buildingID):
-	return str(buildingID)
+	cache.add('ist192881')
+	cache.add('ist190111')
+	usersInBuilding = db.getUsersInSameBuilding({'building':buildingID}, allusers = cache.getAll())
+	return jsonify({'users':list(usersInBuilding)})
 
 #History
 @app.route('/API/admin/logs', methods=['POST'])
@@ -155,13 +156,13 @@ def historyByUser(istID, moves=True, messages=True):
 	#return 'by user'
 	if moves:
 		#User movements
-		userMovements = getUserMovements(istID)
+		userMovements = db.getUserMovements(istID)
 	if messages:
 		#User messages
-		userMessages = getUserMessages(istID)
+		userMessages = db.getUserMessages(istID)
 
 	if moves and messages:
-		logs = sorted([l for l in chain(userMovements, userMessages)], key=lambda k: k['time'])
+		logs = sorted(chain(userMovements, userMessages), key=lambda k: k['time'])
 	elif moves and not messages:
 		logs = userMovements
 	elif messages and not moves:
@@ -227,7 +228,7 @@ def updateLocation(istID):
 def usersInRange(istID):
 	try:		
 		users = db.getUsersInRange(istID)
-		usersInBuilding = db.getUsersInSameBuilding(istID)
+		usersInBuilding = db.getUsersInSameBuilding({'istID':istID}, allusers = cache.getAll())
 		if usersInBuilding != None:
 			users.union(usersInBuilding)
 		return jsonify({'users': "\n".join(users)})
@@ -297,20 +298,23 @@ def testing(istID):
 	return render_template("webApp.html", istID=session.get('username'))
 
 
-@app.route('/logout', methods = ['POST'])
-@login_required
+@app.route('/logout', methods = ['POST','GET'])
+#@login_required
 def logout():
 	#db.removeUser(istID)
+	print("logging out", session.get('username'))
 	print(session)	
 	session.clear()
 	print(session)
+	#r = redirect('https://id.tecnico.ulisboa.pt/cas/logout')
+	#r.headers['Access-Control-Allow-Origin'] = 'https://x509.id.tecnico.ulisboa.pt'
 	return redirect('/login')
 	#Here redirect to login page again
 	#return render_template("webApp.html", istID)
 
 @app.route('/login')
 def log():
-	return render_template("mainPage.html")
+	return render_template("mainPage.html", url='/')
 
 
 def getUserInfo():

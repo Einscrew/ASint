@@ -53,8 +53,8 @@
         $.ajax({
         type: "POST",
         url: '/logout',
-        success:function(data) {
-            window.close()
+        success:(data)=>{
+            window.location.href="/login"//https://id.tecnico.ulisboa.pt/cas/logout"
         }
       });
     }

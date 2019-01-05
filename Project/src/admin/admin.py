@@ -13,14 +13,20 @@ def SetBuildings(file='buildings.json'):
 	return requests.put(URL+'/API/admin/buildings/manage', json=build, auth=('user', 'pass'))
 
 
-def LoggedUsers(buildingID=None):
-	if buildingID is None:
+def LoggedUsers(filters=None):
+	if filters is None:
 		endpoint='/API/admin/users/loggedin'
+		r = requests.post(URL+endpoint, auth=('user', 'pass'))
+		return r.content if r.status_code == 200 else None
 	else:
-		endpoint='/API/admin/buildings/'+str(buildingID)+'/users'
-	return requests.post(URL+endpoint, auth=('user', 'pass'))
-
-
+		s = set()
+		for f in filters:
+			endpoint='/API/admin/buildings/'+f+'/users'
+			r = requests.post(URL+endpoint, auth=('user', 'pass'))
+			if r.status_code == 200:
+				s = s.union(set(r.json().get('users')))
+		return s
+		
 def Logs(filters= None):
 	if not filters or "user" not in filters and "building" not in filters:
 		endpoint='/API/admin/logs'
@@ -56,6 +62,28 @@ def createBot():
 		print("Error occour")
 
 
+
+def getBuilding():
+	if input(">> By building [y|Y]: ") in ['y','Y']:
+		resp = requests.post(URL+'/API/admin/buildings', auth=('user','pass'))
+		if resp.status_code == 200 and 'application/json' in resp.headers['Content-Type']:
+			buildings = resp.json()
+			d = dict()
+			num = 1
+			for b in buildings:
+				d[num] = b['_id']
+				print('{:3} {}'.format(num, b['name']))
+				num = num+1
+
+			num = input('\nType the number(s) of the building(s) to see their active users: ')
+			
+			r = [d[int(n)] for n in num.split(',')]
+			print(r)
+			return r
+
+	return None
+
+
 if __name__ == '__main__':
 	while(True):
 		print('''
@@ -68,7 +96,7 @@ if __name__ == '__main__':
 			if i == 1:
 				SetBuildings()
 			elif i == 2:
-				LoggedUsers()
+				print(LoggedUsers(filters=getBuilding()))
 			elif i == 3:
 				i = input('Logs [raw, user, building]?')
 				f = None
