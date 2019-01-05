@@ -111,7 +111,7 @@ def buildingsList():
 @app.route('/API/admin/users/loggedin', methods=['POST'])
 @admin
 def listLoggedUsers():
-	return str(cache.getAll())
+	return jsonify(cache.getAll())
 
 #Logged Users
 @app.route('/API/admin/users', methods=['POST'])
@@ -123,8 +123,6 @@ def listUsers():
 @app.route('/API/admin/buildings/<string:buildingID>/users', methods=['POST'])
 @admin
 def listUsersInBuilding(buildingID):
-	cache.add('ist192881')
-	cache.add('ist190111')
 	usersInBuilding = db.getUsersInSameBuilding({'building':buildingID}, allusers = cache.getAll())
 	return jsonify({'users':list(usersInBuilding)})
 
