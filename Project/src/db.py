@@ -14,6 +14,9 @@ class Db():
 	
 	#________________________________________________________________________
 	#### Users ####
+	def getUsers(self):
+		return [l['_id'] for l in self.db['users'].find()]
+
 	def insertUser(self, istID, location, myRange):
 		try:
 			self.db['users'].insert_one({'_id': istID, 'location': location, 'range': myRange, 'building': None})#update_one({'_id': istID}, {'_id': istID, 'location': location, 'range': myRange, 'building': None},upsert=True)
@@ -31,8 +34,14 @@ class Db():
 			return False
 
 	def updateUserLocation(self, istID, location):
-		try:
-			self.db['users'].update_one({'_id': istID}, {'$set': {'location': location}})
+		print('user update')
+		self.db['users'].update_one({'_id': istID}, {'$set': {'location': location}})
+		print('location done')
+		b = self.getUserBuilding(istID)
+		print('user in',b)
+		self.insertMovement(istID, location, b)
+		print('inserting Movements')
+		try:			
 			return True
 		except:
 			print('Error changing user location')
@@ -50,28 +59,23 @@ class Db():
 	def getUserBuilding(self, istID):
 		user = self.db['users'].find_one({'_id': istID})
 		allBuildings = self.db['buildings'].find()
-		inBuilding= lambda u1,u2: geo.distance(u1['location'],u2['location']) < 50
-		for building in allBuildings:
-			if inBuilding(user, building):
-				self.db['users'].update_one({'_id': istID}, {'$set': {'building': building['_id']}}) 
-				return True
-		return False
+		inBuilding= lambda u1,u2: geo.distance(u1['location'],u2['location']) < 20
 
-	def getUsersInRange(self, istID):
+		buildings = [b['_id'] for b in allBuildings if inBuilding(user, b)]
+
+		self.db['users'].update_one({'_id': istID}, {'$set': {'building': buildings}})
+
+		return buildings
+
+	def getUsersInRange(self, istID, allusers):
 		u = self.db['users'].find_one({'_id':istID})
 		inRange = lambda u1,u2: geo.distance(u1['location'],u2['location']) < u1['range']
 
-		allusers = self.db['users'].find()
+		users = self.db['users'].find({'_id':{'$in':allusers}})
 
-		return set(user['_id'] for user in allusers if user['_id'] != istID and inRange(u,user))
+		return set(user['_id'] for user in users if user['_id'] != istID and inRange(u,user))
 
-	def getUsersInSameBuilding(self, filter, allusers=None):
-
-		if not allusers:
-			allusers = self.db['users'].find()
-			if building != None:
-				return set(u['_id'] for u in allusers if u['_id'] != istID and u['building'] == user['building'])
-
+	def getUsersInSameBuilding(self, filter, allusers):
 		istID = filter.get('istID')
 		if istID:
 			user = self.db['users'].find_one({'_id': istID})
@@ -82,7 +86,7 @@ class Db():
 
 		users = self.db['users'].find({'_id':{'$in':allusers}})
 		if building != None:
-			return set(u['_id'] for u in users if u['_id'] != istID and u['building'] == building)
+			return set(u['_id'] for u in users if u['_id'] != istID and not set(u['building']).isdisjoint(building))
 		else:
 			return None
 
@@ -98,7 +102,7 @@ class Db():
 			return False
 
 	def getUserMovements(self, user):
-		return self.db['movements'].find({'_id': user}).sort('time')
+		return self.db['movements'].find({'user': user}).sort('time')
 
 	def getBuildingMovements(self, buildingID):
 		return self.db['movements'].find({'building': buildingID}).sort('time')
@@ -119,13 +123,14 @@ class Db():
 									'time': datetime.now()})
 		return r
 
-	def insertMessage(self, src, dest, msg, location, buildingID):
+	def insertMessage(self, src, dest, msg):
 		try:
+			u = self.db['users'].find_one({'_id':src})
 			self.db['messages'].insert_one({'src': src, 
 											'dst': dest,
 											'content': msg, 
-											'location': location, 
-											'building': buildingID,
+											'location': u['location'], 
+											'building': u['building'],
 											'time': datetime.now()})
 			return True
 		except:
@@ -136,6 +141,14 @@ class Db():
 		lastIndex = lastIndex if lastIndex > 0 else 0
 		try:
 			r = [ [i['src'],i['content'], i['time']] for i in self.db['messages'].find({'dst': user}).skip(lastIndex)]#.sort(key=lambda e: e[2])
+			return r#excludes destiny from the result
+		except:
+			print('Error getting messages')
+			return False
+
+	def getUserSentMessages(self, user, lastIndex=0):
+		try:
+			r = [ [i['dst'],i['content'], i['time']] for i in self.db['messages'].find({'src': user}).skip(lastIndex)]#.sort(key=lambda e: e[2])
 			return r#excludes destiny from the result
 		except:
 			print('Error getting messages')

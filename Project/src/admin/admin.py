@@ -26,7 +26,7 @@ def LoggedUsers(filters=None):
 			if r.status_code == 200:
 				s = s.union(set(r.json().get('users')))
 		return s
-		
+
 def Logs(filters= None):
 	if not filters or "user" not in filters and "building" not in filters:
 		endpoint='/API/admin/logs'
@@ -98,12 +98,12 @@ if __name__ == '__main__':
 			elif i == 2:
 				print(LoggedUsers(filters=getBuilding()))
 			elif i == 3:
-				i = input('Logs [raw, user, building]?')
+				i = input('Logs[raw, user, building]?')
 				f = None
 				if i == "user" or i == "building":
 					f = dict()
 					f[i] = input(i+ "number: ")
-				Logs(filters = f)
+				print(Logs(filters = f).json())
 			elif i == 4:
 				createBot()
 

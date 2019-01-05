@@ -113,6 +113,12 @@ def buildingsList():
 def listLoggedUsers():
 	return str(cache.getAll())
 
+#Logged Users
+@app.route('/API/admin/users', methods=['POST'])
+@admin
+def listUsers():
+	return str(db.getUsers())
+
 #Logged Users In building
 @app.route('/API/admin/buildings/<string:buildingID>/users', methods=['POST'])
 @admin
@@ -123,52 +129,60 @@ def listUsersInBuilding(buildingID):
 	return jsonify({'users':list(usersInBuilding)})
 
 #History
-@app.route('/API/admin/logs', methods=['POST'])
+@app.route('/API/admin/buildings/<string:buildingID>/user/<string:istID>/logs', methods=['POST'])
 @admin
-def history():
-	return "hello"+request.url
+def history(buildingID,istID):
+	l = logsByBuilding(buildingID)
+	def f(k):
+		if k['type'] == 'movement':
+			return [k['info']]
+		elif k['type'] == 'msg':
+			return [k['info'][0],*k['info'][1]]
+		return []
+	return jsonify([k for k in l if istID in f(k[1])])
 
 #history by building
-@app.route('/API/admin/building/<string:buildingID>/logs', methods=['POST'])
+@app.route('/API/admin/buildings/<string:buildingID>/logs', methods=['POST'])
 @admin
 def historyByBuilding(buildingID, moves=True, messages=True):
+	return jsonify(logsByBuilding(buildingID, moves=True, messages=True))
+
+def logsByBuilding(buildingID, moves=True, messages=True):
 	#return 'by building'
+	t = list()
 	if moves:
 		#Movements in building
-		buildingMoves = db.getBuildingMovements(buildingID)
+		for i in db.getBuildingMovements(buildingID):
+			t.append((i['time'],{'info':i['user'],'type':'movement'},i['location']))
 	if messages:
 		#Messages in building
-		buildingMessages = db.getBuildingMessages(buildingID)
+		for i in db.getBuildingMessages(buildingID):
+			t.append((i['time'],{'info':(i['src'],i['dst'],i['content']),'type':'msg'},i['location']))
 
 	if moves and messages:
-		logs = sorted([l for l in chain(buildingMoves, buildingMessages)], key=lambda k: k['time'])
-	elif moves and not messages:
-		logs = buildingMoves
-	elif messages and not moves:
-		logs = buildingMessages
-
-	return str(logs)
+		t = sorted(t, key=lambda k: k[0])
+	return t
 
 #history by user
 @app.route('/API/admin/users/<string:istID>/logs', methods=['POST'])
 @admin
 def historyByUser(istID, moves=True, messages=True):
 	#return 'by user'
+	t = list()
 	if moves:
-		#User movements
-		userMovements = db.getUserMovements(istID)
+		#Movements from user
+		for i in db.getUserMovements(istID):
+			t.append((i['time'],{'info':i['user'],'type':'movement'},i['location']))
 	if messages:
-		#User messages
-		userMessages = db.getUserMessages(istID)
+		#Messages from user
+		for i in db.getUserMessages(istID):
+			t.append((i[2],{'info':(i[:2]),'type':'received'}))
+		for i in db.getUserSentMessages(istID):
+			t.append((i[2],{'info':(i[:2]),'type':'sent'}))
 
 	if moves and messages:
-		logs = sorted(chain(userMovements, userMessages), key=lambda k: k['time'])
-	elif moves and not messages:
-		logs = userMovements
-	elif messages and not moves:
-		logs = userMessages
-
-	return str(logs)
+		t = sorted(t, key=lambda k: k[0])
+	return jsonify(t)
 
 #create new bot
 @app.route('/API/admin/bot/create', methods=['PUT'])
@@ -195,7 +209,7 @@ def sendMsg(istID):
 	try:
 		print(request.is_json)
 		d = request.get_json()
-		return str(db.insertMessage(istID, [*db.getUsersInRange(istID)], d.get('message'), d.get('location'), None))
+		return str(db.insertMessage(istID, [*db.getUsersInRange(istID, cache.getAll())], d.get('message')))
 	except:
 		return abort(500)
 
@@ -215,10 +229,11 @@ def setRange(istID, newRange):
 @login_required
 def updateLocation(istID):
 	try:
-		print(request.is_json)
 		d = request.get_json()
-		db.updateUserLocation(istID,d)
+		print(d)	
+		db.updateUserLocation(istID,{ "lat": 38.7368098, "lon": -9.1397191})
 	except:
+		print('Error update location')
 		return abort(500)
 	return "ok"
 
@@ -227,12 +242,13 @@ def updateLocation(istID):
 @login_required
 def usersInRange(istID):
 	try:		
-		users = db.getUsersInRange(istID)
-		usersInBuilding = db.getUsersInSameBuilding({'istID':istID}, allusers = cache.getAll())
+		users = db.getUsersInRange(istID, cache.getAll())
+		usersInBuilding = db.getUsersInSameBuilding({'istID':istID}, cache.getAll())
 		if usersInBuilding != None:
 			users.union(usersInBuilding)
 		return jsonify({'users': "\n".join(users)})
 	except:
+		print('Error users in range')
 		return abort(500)
 
 #List messages received
@@ -243,14 +259,6 @@ def received(istID):
 	if request.is_json:
 		i = int(request.get_json()['number'])
 	return jsonify(db.getUserMessages(istID, lastIndex = i))
-
-#Updates user's building
-@app.route('/API/users/<string:istID>/building', methods=['POST'])
-@login_required
-def updateBuilding(istID):
-	db.getUserBuilding(istID)
-	return "ok"
-
 
 '''BOTS ENDPOINTS'''
 @app.route('/API/bots/<string:key>/message', methods=['POST'])
@@ -268,10 +276,8 @@ def dissipateMessage(key):
 
 
 
-#@app.route('/')
-#def hello_world():
-#	url='https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id='+str(FENIX_API['clientID'])+'&redirect_uri='+FENIX_API['redirectURI']
-#	return render_template("mainPage.html", url=url)
+
+
 
 @app.route('/')
 def hello_world():
@@ -302,6 +308,7 @@ def testing(istID):
 #@login_required
 def logout():
 	#db.removeUser(istID)
+
 	print("logging out", session.get('username'))
 	print(session)	
 	session.clear()
