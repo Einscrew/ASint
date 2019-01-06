@@ -32,7 +32,6 @@ with open("secret", 'rb') as f:
 APP['redirectURI'] = 'https://asint-2018.appspot.com/'
 APP['loginURI'] = 'https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id='+str(APP['clientID'])+'&redirect_uri='+APP['redirectURI']
 
-
 def validAdmin(username, password):
 	return username == app.config['USER'] and password == app.config['PASS']
 
@@ -103,7 +102,7 @@ def buildingsList():
 @app.route('/API/admin/users/loggedin', methods=['POST'])
 @admin
 def listLoggedUsers():
-	return str(cache.getAll())
+	return jsonify(cache.getAll())
 
 #Logged Users
 @app.route('/API/admin/users', methods=['POST'])
@@ -175,13 +174,13 @@ def historyByUser(istID, moves=True, messages=True):
 	return jsonify(t)
 
 #create new bot
-#create new bot
 @app.route('/API/admin/bot/create', methods=['PUT'])
 @admin
 def newBot():
 	b = request.form['buildings'].split(',')
 	r = db.insertBot(b)
 	return jsonify({ 'key':r })
+
 
 '''USER ENDPOINTS'''
 @app.route('/API/login/', methods=['POST'])
@@ -191,6 +190,17 @@ def fenixLogin():
 	#User(1234)
 	#fenixURL = 'https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id='+str(FENIX_API['clientID'])+'&redirect_uri='+FENIX_API['redirectURI']
 	#redirect(fenixURL)
+
+#Send Message
+@app.route('/API/users/<string:istID>/message', methods=['POST'])
+@login_required
+def sendMsg(istID):
+	try:
+		print(request.is_json)
+		d = request.get_json()
+		return str(db.insertMessage(istID, [*db.getUsersInRange(istID, cache.getAll())], d.get('message')))
+	except:
+		return abort(500)
 
 #Set Range
 @app.route('/API/users/<string:istID>/range/<int:newRange>',methods=['POST'])
