@@ -258,7 +258,7 @@ def dissipateMessage(key):
 	buildings = db.getBot(key)
 	r = 0
 	for buildingID in buildings:
-		r = r + db.insertMessageInBuilding('Bot', request.data, buildingID, cache.getAll())
+		r = r + db.insertMessageInBuilding('Bot', str(request.data), buildingID, cache.getAll())
 
 	return 'Sending complete ('+str(r)+')'
 

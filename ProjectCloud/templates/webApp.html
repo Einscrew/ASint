@@ -69,6 +69,7 @@
             console.log('ok '+data.length+' messages ('+numberMessages+')')
             numberMessages += data.length
             if(data.length > 0)
+                data.forEach(function(e){e.pop();console.log(e)})
                 $("#receivedMsgs").append(data.join('\n')+'\n')//data["message"])
             setTimeout(getMessages, 1000);
         }
