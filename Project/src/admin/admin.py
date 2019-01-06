@@ -4,6 +4,17 @@ import json
 #URL = 'https://asint-2018.appspot.com'
 URL = 'http://127.0.0.1:5000'
 
+class color:
+   PURPLE = '\033[95m'
+   CYAN = '\033[96m'
+   DARKCYAN = '\033[36m'
+   BLUE = '\033[94m'
+   GREEN = '\033[92m'
+   YELLOW = '\033[93m'
+   RED = '\033[91m'
+   BOLD = '\033[1m'
+   UNDERLINE = '\033[4m'
+   END = '\033[0m'
 
 def SetBuildings(file='buildings.json'):
 	try:
@@ -69,7 +80,7 @@ def getBuilding():
 		for num, b in enumerate(buildings,1):
 			d[num] = {'_id':b['_id'],'name':b['name'], 'num':num}
 			print('\t{:3} {}'.format(num, b['name']))
-		num = input('\nType the number(s) of the building(s) to see their active users: ')
+		num = input('\nType the number of the building to see their active users: ')
 		if len(num) == 0:
 			return None
 		try:
@@ -80,20 +91,38 @@ def getBuilding():
 		print('[{}] No buildings available'.format(resp.status_code))
 		return None
 
-def logEntry(e):
-	#\xF0\x9F\x93\xA8
-	#\xF0\x9F\x93\xA9
+def logEntry(e,l, user = None):
 	t = e.get('type')
-	if t in ('sent','received'):
-		return '{}][{}'.format('msg'.center(len('movement')), ' user '+e.get('info')[0])
-		#if e.get('info').get()
+	if t in ('sent','msg','received'):
+		if t == 'msg':
+			ch = '>>>'
+			frm = e.get('info')[0]
+			to = e.get('info')[1]
+			cnt = e.get('info')[2]
+
+		if t == 'sent':
+			ch = '>>>'
+			frm = user
+			to = ','.join(e.get('info')[0])
+			cnt = e.get('info')[1]
+
+		if t == 'received':
+			ch = '<<<'
+			frm = user
+			to = e.get('info')[0]
+			cnt = e.get('info')[1]
+
+		f = ' {}{}{} {} {}'.format(color.BOLD,frm,color.END,ch, to)
+		return '{}][{} : {}][{}] ════╣{}╠════'.format('msg'.center(len('movement')),l.get('lat'),l.get('lon'),f,cnt)
+
+
 	if t == 'movement':
-		return 'movement'
+		return 'movement][{} : {}]'.format(l.get('lat'),l.get('lon'))
 
 
 
-def format(listlogs):
-	return [ "[{}][{}]".format(l[0].split(',')[1][1:-3] , logEntry(l[1])) for l in listlogs]
+def format(listlogs, user = None):
+	return [ "[{}][{}".format(l[0].split(',')[1][1:-4] , logEntry(l[1],l[2], user = user)) for l in listlogs]
 
 
 def Logs():
@@ -120,7 +149,7 @@ def Logs():
 	if resp.status_code == 200:
 		print('received:',resp.json())
 		print(">"*20)
-		print(*format(resp.json()), sep='\n')
+		print(*format(resp.json(),user = u), sep='\n')
 		print("<"*20)
 	else:
 		print('[{}] Error'.format(resp.status_code))
@@ -144,7 +173,9 @@ def createBot():
 			try:
 				data = [d[int(n)] for n in num]
 				data = ','.join(data)
-				print(requests.put(URL+'/API/admin/bot/create', data = {'buildings':data}, auth=('user', 'pass')).content)
+				r = requests.put(URL+'/API/admin/bot/create', data = {'buildings':data}, auth=('user', 'pass'))
+				if r.status_code == 200 and 'application/json' in resp.headers['Content-Type']:
+					print('\nUse the user '+color.BOLD+color.RED+'bot'+color.END+' and pass:',color.BOLD+color.RED+r.json().get('key')+color.END, 'to send message to the building defined')
 			except KeyError:
 				print("Error on input")
 	else:
@@ -153,6 +184,7 @@ def createBot():
 
 if __name__ == '__main__':
 	while(True):
+		print()
 		print('''Menu
 	1 - setup buildings
 	2 - logged in users
@@ -174,4 +206,6 @@ if __name__ == '__main__':
 				createBot()
 
 		except TypeError:
+			pass
+		except ValueError:
 			pass
