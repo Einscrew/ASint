@@ -3,7 +3,6 @@ from flask import Flask, Response, abort, make_response, render_template, reques
 from itertools import chain
 import db
 
-import google.appengine.api.memcache
 
 from cacheSet import volatileSet
 
@@ -19,7 +18,6 @@ app = Flask(__name__)
 app.config.from_pyfile('settings')
 
 cache = volatileSet()
-memcache.add(key='users', value = cache)
 
 db = db.Db()
 
@@ -81,7 +79,7 @@ def login_required(f):
 			return redirect(APP['loginURI'])
 		if user not in kwargs.values():
 			return abort(401) #unauthorized
-		memcache.get('users').add(user, timeout= datetime.timedelta(seconds = 5))
+		cache.add(user, timeout= datetime.timedelta(seconds = 5))
 		return f(*args, **kwargs)
 	return decorated_function
 
@@ -114,7 +112,7 @@ def buildingsList():
 @app.route('/API/admin/users/loggedin', methods=['POST'])
 @admin
 def listLoggedUsers():
-	return str(memcache.get('users').getAll())
+	return str(cache.getAll())
 
 #Logged Users
 @app.route('/API/admin/users', methods=['POST'])
@@ -126,7 +124,7 @@ def listUsers():
 @app.route('/API/admin/buildings/<string:buildingID>/users', methods=['POST'])
 @admin
 def listUsersInBuilding(buildingID):
-	usersInBuilding = db.getUsersInSameBuilding({'building':buildingID}, allusers = memcache.get('users').getAll())
+	usersInBuilding = db.getUsersInSameBuilding({'building':buildingID}, allusers = cache.getAll())
 	return jsonify({'users':list(usersInBuilding)})
 
 #History
@@ -210,7 +208,7 @@ def sendMsg(istID):
 	try:
 		print(request.is_json)
 		d = request.get_json()
-		return str(db.insertMessage(istID, [*db.getUsersInRange(istID, memcache.get('users').getAll())], d.get('message')))
+		return str(db.insertMessage(istID, [*db.getUsersInRange(istID, cache.getAll())], d.get('message')))
 	except:
 		return abort(500)
 
@@ -242,8 +240,8 @@ def updateLocation(istID):
 @login_required
 def usersInRange(istID):
 	try:		
-		users = db.getUsersInRange(istID, memcache.get('users').getAll())
-		usersInBuilding = db.getUsersInSameBuilding({'istID':istID}, memcache.get('users').getAll())
+		users = db.getUsersInRange(istID, cache.getAll())
+		usersInBuilding = db.getUsersInSameBuilding({'istID':istID}, cache.getAll())
 		if usersInBuilding != None:
 			users.union(usersInBuilding)
 		return jsonify({'users': "\n".join(users)})

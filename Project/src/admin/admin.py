@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 import requests
 import json
+import sys
+
 #URL = 'https://asint-2018.appspot.com'
 URL = 'http://127.0.0.1:5000'
+
+if len(sys.argv) > 1:
+	URL = sys.argv[1]
 
 class color:
    PURPLE = '\033[95m'
