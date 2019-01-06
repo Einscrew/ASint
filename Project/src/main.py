@@ -31,15 +31,6 @@ with open("../secret", 'rb') as f:
 APP['redirectURI'] = 'http://127.0.0.1:5000/'
 APP['loginURI'] = 'https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id='+str(APP['clientID'])+'&redirect_uri='+APP['redirectURI']
 
-@app.after_request
-def add_header(response):
-	"""
-	Add headers to both force latest IE rendering engine or Chrome Frame,
-	and also to cache the rendered page for 10 minutes.
-	"""
-	response.headers['X-UA-Compatible'] = 'IE=Edge,chrome=1'
-	response.headers['Cache-Control'] = 'public, max-age=0'
-	return response
 
 def validAdmin(username, password):
 	return username == app.config['USER'] and password == app.config['PASS']

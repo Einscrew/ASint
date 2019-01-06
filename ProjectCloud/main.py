@@ -32,15 +32,6 @@ with open("secret", 'rb') as f:
 APP['redirectURI'] = 'https://asint-2018.appspot.com/'
 APP['loginURI'] = 'https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id='+str(APP['clientID'])+'&redirect_uri='+APP['redirectURI']
 
-@app.after_request
-def add_header(response):
-	"""
-	Add headers to both force latest IE rendering engine or Chrome Frame,
-	and also to cache the rendered page for 10 minutes.
-	"""
-	response.headers['X-UA-Compatible'] = 'IE=Edge,chrome=1'
-	response.headers['Cache-Control'] = 'public, max-age=0'
-	return response
 
 def validAdmin(username, password):
 	return username == app.config['USER'] and password == app.config['PASS']
@@ -175,14 +166,15 @@ def historyByUser(istID, moves=True, messages=True):
 	if messages:
 		#Messages from user
 		for i in db.getUserMessages(istID):
-			t.append((i[2],{'info':(i[:2]),'type':'received'}))
+			t.append((i[2],{'info':(i[:2]),'type':'received'},i[3]))
 		for i in db.getUserSentMessages(istID):
-			t.append((i[2],{'info':(i[:2]),'type':'sent'}))
+			t.append((i[2],{'info':(i[:2]),'type':'sent'},i[3]))
 
 	if moves and messages:
 		t = sorted(t, key=lambda k: k[0])
 	return jsonify(t)
-
+	
+#create new bot
 #create new bot
 @app.route('/API/admin/bot/create', methods=['PUT'])
 @admin
@@ -190,7 +182,6 @@ def newBot():
 	b = request.form['buildings'].split(',')
 	r = db.insertBot(b)
 	return jsonify({ 'key':r })
-
 
 '''USER ENDPOINTS'''
 @app.route('/API/login/', methods=['POST'])
@@ -201,14 +192,14 @@ def fenixLogin():
 	#fenixURL = 'https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id='+str(FENIX_API['clientID'])+'&redirect_uri='+FENIX_API['redirectURI']
 	#redirect(fenixURL)
 
-#Send Message
-@app.route('/API/users/<string:istID>/message', methods=['POST'])
+#Set Range
+@app.route('/API/users/<string:istID>/range/<int:newRange>',methods=['POST'])
 @login_required
-def sendMsg(istID):
+def setRange(istID, newRange):
 	try:
 		print(request.is_json)
 		d = request.get_json()
-		return str(db.insertMessage(istID, [*db.getUsersInRange(istID, cache.getAll())], d.get('message')))
+		return str(db.updateUserRange(istID, newRange))
 	except:
 		return abort(500)
 
@@ -229,7 +220,7 @@ def setRange(istID, newRange):
 def updateLocation(istID):
 	try:
 		d = request.get_json()
-		db.updateUserLocation(istID,d)
+		db.updateUserLocation(istID,d)#{ "lat": 38.7368098, "lon": -9.1397191})
 	except:
 		print('Error update location')
 		return abort(500)
@@ -268,14 +259,9 @@ def dissipateMessage(key):
 	buildings = db.getBot(key)
 	r = 0
 	for buildingID in buildings:
-		r = r + db.insertMessageInBuilding('Bot', request.data, buildingID)
+		r = r + db.insertMessageInBuilding('Bot', request.data, buildingID, cache.getAll())
 
 	return 'Sending complete ('+str(r)+')'
-
-
-
-
-
 
 @app.route('/')
 def hello_world():
