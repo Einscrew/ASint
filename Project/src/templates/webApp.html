@@ -51,12 +51,12 @@
 
     function logout(){
         $.ajax({
-        type: "POST",
-        url: '/logout',
-        success:(data)=>{
-            window.location.href="/login"//https://id.tecnico.ulisboa.pt/cas/logout"
-        }
-      });
+            type: "POST",
+            url: '/logout',
+            success:(data)=>{
+                window.location.href="/login"//https://id.tecnico.ulisboa.pt/cas/logout"
+            }
+        });
     }
 
     (function getMessages() {

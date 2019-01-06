@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 from flask import Flask, Response, abort, make_response, render_template, request, jsonify, redirect, url_for, session
-from itertools import chain
 import db
 
 from cacheSet import volatileSet
 
 from functools import wraps
 
-from random import randint
 import requests
 import json
 
@@ -183,14 +181,6 @@ def newBot():
 
 
 '''USER ENDPOINTS'''
-@app.route('/API/login/', methods=['POST'])
-@login_required
-def fenixLogin():
-	return jsonify({"istID":'2iwi2kd'})
-	#User(1234)
-	#fenixURL = 'https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id='+str(FENIX_API['clientID'])+'&redirect_uri='+FENIX_API['redirectURI']
-	#redirect(fenixURL)
-
 #Send Message
 @app.route('/API/users/<string:istID>/message', methods=['POST'])
 @login_required
