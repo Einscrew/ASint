@@ -104,18 +104,20 @@ class Db():
 
 	#________________________________________________________________________
 	#### Messages ####
-	def insertMessageInBuilding(self, src, msg, buildingID):
-		dest = self.db['users'].find({'building': {'$eq':buildingID}})
+	def insertMessageInBuilding(self, src, msg, buildingID, active):
+		dest = self.db['users'].find({'building': {'$eq':buildingID}, '_id':{'$in':active}})
 		r = dest.count()
 		if r > 0:
+			dst = [ d['_id'] for d in dest ]
+			print(dst)
 			s = self.getBuildings(id = buildingID)
 			if len(s) == 1:
-				self.insertMessage({'src': src,
-									'dst': [ d['_id'] for d in dest ], 
-									'content': msg, 
-									'location': s[0]['location'], 
-									'building': buildingID ,
-									'time': datetime.now()})
+				self.db['messages'].insert_one({'src': src, 
+											'dst': dst,
+											'content': msg, 
+											'location': s[0]['location'], 
+											'building': buildingID,
+											'time': datetime.now()})
 		return r
 
 	def insertMessage(self, src, dest, msg):
@@ -135,7 +137,7 @@ class Db():
 	def getUserMessages(self, user, lastIndex=0):
 		lastIndex = lastIndex if lastIndex > 0 else 0
 		try:
-			r = [ [i['src'],i['content'], i['time']] for i in self.db['messages'].find({'dst': user}).skip(lastIndex)]#.sort(key=lambda e: e[2])
+			r = [ [i['src'],i['content'], i['time'],i['location']] for i in self.db['messages'].find({'dst': user}).skip(lastIndex)]#.sort(key=lambda e: e[2])
 			return r#excludes destiny from the result
 		except:
 			print('Error getting messages')
@@ -143,7 +145,7 @@ class Db():
 
 	def getUserSentMessages(self, user, lastIndex=0):
 		try:
-			r = [ [i['dst'],i['content'], i['time']] for i in self.db['messages'].find({'src': user}).skip(lastIndex)]#.sort(key=lambda e: e[2])
+			r = [ [i['dst'],i['content'], i['time'],i['location']] for i in self.db['messages'].find({'src': user}).skip(lastIndex)]#.sort(key=lambda e: e[2])
 			return r#excludes destiny from the result
 		except:
 			print('Error getting messages')
