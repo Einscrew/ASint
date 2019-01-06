@@ -20,9 +20,13 @@ def SetBuildings(file='buildings.json'):
 	try:
 		with open(file, 'r') as f:
 			build = json.load(f)
+		return requests.put(URL+'/API/admin/buildings/manage', json=build, auth=('user', 'pass'))
+	except requests.exceptions.ConnectionError:
+		print('Problem in the connection')
+		return 'error'
 	except:
 		return 'error'
-	return requests.put(URL+'/API/admin/buildings/manage', json=build, auth=('user', 'pass'))
+	
 
 def LoggedUsers():
 	i = input('Logged users:\n\t1 - all\n\t2 - by building\n\t\n>> ')
@@ -134,6 +138,9 @@ def Logs():
 			u = getUsers()[0]
 		if i != '1':
 			b = getBuilding()[0]['_id']
+	except requests.exceptions.ConnectionError:
+		print('Problem in the connection')
+		return
 	except:
 		print("Problems on input")
 		return
