@@ -173,7 +173,7 @@ def historyByUser(istID, moves=True, messages=True):
 	if moves and messages:
 		t = sorted(t, key=lambda k: k[0])
 	return jsonify(t)
-	
+
 #create new bot
 #create new bot
 @app.route('/API/admin/bot/create', methods=['PUT'])
@@ -191,17 +191,6 @@ def fenixLogin():
 	#User(1234)
 	#fenixURL = 'https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id='+str(FENIX_API['clientID'])+'&redirect_uri='+FENIX_API['redirectURI']
 	#redirect(fenixURL)
-
-#Set Range
-@app.route('/API/users/<string:istID>/range/<int:newRange>',methods=['POST'])
-@login_required
-def setRange(istID, newRange):
-	try:
-		print(request.is_json)
-		d = request.get_json()
-		return str(db.updateUserRange(istID, newRange))
-	except:
-		return abort(500)
 
 #Set Range
 @app.route('/API/users/<string:istID>/range/<int:newRange>',methods=['POST'])
