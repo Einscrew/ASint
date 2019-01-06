@@ -174,9 +174,9 @@ def historyByUser(istID, moves=True, messages=True):
 	if messages:
 		#Messages from user
 		for i in db.getUserMessages(istID):
-			t.append((i[2],{'info':(i[:2]),'type':'received'}))
+			t.append((i[2],{'info':(i[:2]),'type':'received'},i[3]))
 		for i in db.getUserSentMessages(istID):
-			t.append((i[2],{'info':(i[:2]),'type':'sent'}))
+			t.append((i[2],{'info':(i[:2]),'type':'sent'},i[3]))
 
 	if moves and messages:
 		t = sorted(t, key=lambda k: k[0])
@@ -228,8 +228,7 @@ def setRange(istID, newRange):
 def updateLocation(istID):
 	try:
 		d = request.get_json()
-		print(d)	
-		db.updateUserLocation(istID,{ "lat": 38.7368098, "lon": -9.1397191})
+		db.updateUserLocation(istID,d)#{ "lat": 38.7368098, "lon": -9.1397191})
 	except:
 		print('Error update location')
 		return abort(500)
@@ -268,7 +267,7 @@ def dissipateMessage(key):
 	buildings = db.getBot(key)
 	r = 0
 	for buildingID in buildings:
-		r = r + db.insertMessageInBuilding('Bot', request.data, buildingID)
+		r = r + db.insertMessageInBuilding('Bot', request.data, buildingID, cache.getAll())
 
 	return 'Sending complete ('+str(r)+')'
 
