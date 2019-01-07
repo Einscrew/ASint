@@ -13,6 +13,7 @@ import requests
 import json
 
 import datetime
+import sys
 
 app = Flask(__name__)
 app.config.from_pyfile('settings')
@@ -21,15 +22,18 @@ cache = volatileSet()
 
 db = db.Db()
 
-with open("keys.json",'r') as f:
-	APP = json.load(f)
 
+if len(sys.argv) > 1:
+	file = "keys.json"
+else:
+	file = "keyscloud.json"
+
+with open(file,'r') as f:
+		APP = json.load(f)
 
 with open("secret", 'rb') as f:
 	app.secret_key = f.read()
 
-
-APP['redirectURI'] = 'https://asint-2018.appspot.com/'
 APP['loginURI'] = 'https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id='+str(APP['clientID'])+'&redirect_uri='+APP['redirectURI']
 
 def validAdmin(username, password):
