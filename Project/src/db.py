@@ -25,14 +25,6 @@ class Db():
 			print('Error inserting user, because already exists')
 			return self.db['users'].find_one({'_id': istID}).get('range')
 
-	def removeUser(self, istID):
-		try:
-			self.db['users'].delete_one({'_id': istID})
-			return True
-		except:
-			print('Error removing user')
-			return False
-
 	def updateUserLocation(self, istID, location):
 		try:
 			self.db['users'].update_one({'_id': istID}, {'$set': {'location': location}})
