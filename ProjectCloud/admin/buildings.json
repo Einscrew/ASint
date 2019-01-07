@@ -1,0 +1,57 @@
+[ {
+    "_id" : "2448131361042",
+    "name" : "Pavilhão de Civil",
+    "location":{
+        "lat": 38.7368263,
+        "lon" : -9.139276
+    }
+  }, {
+    "_id" : "2448131361155",
+    "name" : "Pavilhão de Mecânica III",
+    "location":{
+        "lat":38.7368263,
+        "lon": -9.139276
+    }
+  },{
+    "_id" : "2448131384238",
+    "name" : "Pavilhão da Associação dos Estudantes",
+    "location":{
+        "lat": 38.7368942,
+        "lon": -9.1378801
+    }
+  }, {
+    "_id" : "2448131361129",
+    "name" : "Pavilhão de Informática III",
+    "location":{
+        "lat": 38.7374625,
+        "lon": -9.1378465
+    }
+  }, {
+    "_id" : "2448131361074",
+    "name" : "Torre Sul",
+    "location":{
+        "lat": 38.7363775,
+        "lon": -9.138574
+    }
+  },{
+    "_id" : "2448131361091",
+    "name" : "Torre Norte",
+    "location":{
+        "lat" : 38.7375584,
+        "lon" : -9.1387255
+    }
+  },{
+    "_id" : "2448131361119",
+    "name" : "Pavilhão de Matemática",
+    "location":{
+        "lat": 38.7358895,
+        "lon": -9.1399463
+    }
+  },{
+    "_id" : "2448131361060",
+    "name" : "Pavilhão Central",
+    "location":{
+        "lat": 38.7368098,
+        "lon": -9.1397191
+    }
+  }]
