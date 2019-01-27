@@ -146,12 +146,15 @@
     }
 
     function updateLoc() {
+
+        loc = document.getElementById("changeLoc")
+
         if(posFixed == 0){
             posFixed = 1
-            document.getElementById("changeLoc").innnerHTML = "Get Current Location";
+            loc.innnerHTML = "Get Current Location";
         }else{
             posFixed = 0
-            document.getElementById("changeLoc").innnerHTML = "Force Location";
+            loc.innnerHTML = "Force Location";
         }
     }
 
