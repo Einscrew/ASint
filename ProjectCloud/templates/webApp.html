@@ -149,10 +149,10 @@
     function updateLoc() {
         if(posFixed == 0){
             posFixed = 1
-            $('#changeLoc').val('Get Current Location')
+            document.getElementById("changeLoc").innnerHTML = "Get Current Location"
         }else{
             posFixed = 0
-            $('#changeLoc').val('Force Location')
+            document.getElementById("changeLoc").innnerHTML = "Force Location"
         }
     }
 
