@@ -287,8 +287,8 @@ def hello_world():
 @app.route('/testing/<string:istID>')
 def testing(istID):
 	session['username'] = istID
-	currRange = db.insertUser(session.get('username'), {'lat':0,'lon':0}, 10)
-	return render_template("webApp.html", istID=session.get('username'), range=currRange)
+	currRange, loc = db.insertUser(session.get('username'), {'lat':0,'lon':0}, 10)
+	return render_template("webApp.html", istID=session.get('username'), range=currRange, lat=loc.get('lat'), lon=loc.get('lon'))
 
 
 @app.route('/logout', methods = ['POST','GET'])

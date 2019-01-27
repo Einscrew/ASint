@@ -134,7 +134,7 @@
     function updateLoc() {
         
         posFixed = 1
-        if($('#lat').val() != null && $('#lon').val() != null){
+        if($('#lat').val() != '' && $('#lon').val() != ''){
             lat = parseFloat($('#lat').val())
             lon = parseFloat($('#lon').val())
             pos = {'lat': lat, 'lon': lon}
