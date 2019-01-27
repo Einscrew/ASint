@@ -34,8 +34,8 @@
     function renderPage(){
         $("#loggedPage").append("<button onclick='logout()'>Logout</button><br><br>")
         $("#loggedPage").append("Current location: ")
-        $("#loggedPage").append("<input id='lat' placeholder='lat' value={{lat}}/>")
-        $("#loggedPage").append("<input id='lon' placeholder='lon' value={{lon}}/>")
+        $("#loggedPage").append("<input id='lat' placeholder='lat' value='{{lat}}'/>")
+        $("#loggedPage").append("<input id='lon' placeholder='lon' value='{{lon}}'/>")
         $("#loggedPage").append("<button id='changeLoc' onclick='updateLoc()'>Force Location</button><br><br>")
         $("#loggedPage").append("Current range: ")
         $("#loggedPage").append("<input id='range' value='{{range}}' />")
