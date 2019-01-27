@@ -85,7 +85,7 @@
     function showPosition(position) {
         if(posFixed == 0){
             console.log('User position has changed')
-            if (pos != {'lat': position.coords.latitude , 'lon': position.coords.longitude} && position.coords.latitude != null && position.position.coords.longitude != null){
+            if (position.coords.latitude != null && position.position.coords.longitude != null && pos != {'lat': position.coords.latitude , 'lon': position.coords.longitude}){
                 pos = {'lat': position.coords.latitude , 'lon': position.coords.longitude}
                 $.ajax({
                     type: "POST",
@@ -104,7 +104,9 @@
             }
         }else{
             if($('#lat').val() != null && $('#lon').val() != null){
-                pos = {'lat': $('#lat').val() , 'lon': $('#lon').val()}
+                lat = parseFloat($('#lat').val())
+                lon = parseFloat($('#lon').val())
+                pos = {'lat': lat, 'lon': lon}
 
                 $.ajax({
                     type: "POST",
@@ -151,10 +153,10 @@
 
         if(posFixed == 0){
             posFixed = 1
-            loc.innnerText = "Get Current Location";
+            loc.textContent = "Get Current Location";
         }else{
             posFixed = 0
-            loc.innnerText = "Force Location";
+            loc.textContent = "Force Location";
         }
     }
 
