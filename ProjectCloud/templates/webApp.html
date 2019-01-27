@@ -36,6 +36,7 @@
         $("#loggedPage").append("Current location: ")
         $("#loggedPage").append("<input id='lat' placeholder='lat' value='{{lat}}'/>")
         $("#loggedPage").append("<input id='lon' placeholder='lon' value='{{lon}}'/>")
+        $("#loggedPage").append("<button id='currLoc' onclick='currLoc()'>Current Location</button>")
         $("#loggedPage").append("<button id='changeLoc' onclick='updateLoc()'>Force Location</button><br><br>")
         $("#loggedPage").append("Current range: ")
         $("#loggedPage").append("<input id='range' value='{{range}}' />")
@@ -85,7 +86,7 @@
     function showPosition(position) {
         if(posFixed == 0){
             console.log('User position has changed')
-            if (position.coords.latitude != null && position.position.coords.longitude != null && pos != {'lat': position.coords.latitude , 'lon': position.coords.longitude}){
+            if (pos != {'lat': position.coords.latitude , 'lon': position.coords.longitude}){
                 pos = {'lat': position.coords.latitude , 'lon': position.coords.longitude}
                 $.ajax({
                     type: "POST",
@@ -102,24 +103,7 @@
                     }
                 }); 
             }
-        }else{
-            if($('#lat').val() != null && $('#lon').val() != null){
-                lat = parseFloat($('#lat').val())
-                lon = parseFloat($('#lon').val())
-                pos = {'lat': lat, 'lon': lon}
-
-                $.ajax({
-                    type: "POST",
-                    url: '/API/users/{{istID}}/location',
-                    datatype: "json",
-                    contentType: "application/json",
-                    data: JSON.stringify(pos),
-                    success: function(data) {
-                        console.log('Position set')
-                    }
-                }); 
-            }
-        }         
+        }        
     }
 
     (function getUsersInRangeAndInBuilding(){
@@ -148,16 +132,28 @@
     }
 
     function updateLoc() {
+        
+        posFixed = 1
+        if($('#lat').val() != null && $('#lon').val() != null){
+            lat = parseFloat($('#lat').val())
+            lon = parseFloat($('#lon').val())
+            pos = {'lat': lat, 'lon': lon}
 
-        loc = document.getElementById("changeLoc")
+            $.ajax({
+                type: "POST",
+                url: '/API/users/{{istID}}/location',
+                datatype: "json",
+                contentType: "application/json",
+                data: JSON.stringify(pos),
+                success: function(data) {
+                    console.log('Position set')
+                }
+            }); 
+        } 
+    }
 
-        if(posFixed == 0){
-            posFixed = 1
-            loc.textContent = "Get Current Location";
-        }else{
-            posFixed = 0
-            loc.textContent = "Force Location";
-        }
+    function currLoc(){
+        posFixed = 0
     }
 
 </script>
