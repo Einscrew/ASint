@@ -13,7 +13,7 @@
 
 <script>
     renderPage()
-    var pos, numberMessages = 0
+    var pos, numberMessages = 0, posFixed = 0
     function sendMsg(){
     	var message = $("#textMsg").val()
     	if(message != ""){
@@ -36,7 +36,8 @@
         $("#loggedPage").append("<button onclick='logout()'>Logout</button><br><br>")
         $("#loggedPage").append("Current location: ")
         $("#loggedPage").append("<input id='lat' placeholder='lat'/>")
-        $("#loggedPage").append("<input id='lon' placeholder='lon'/><br><br>")
+        $("#loggedPage").append("<input id='lon' placeholder='lon'/>")
+        $("#loggedPage").append("<button id='changeLoc' onclick='updateLoc()'>Force Location</button><br><br>")
         $("#loggedPage").append("Current range: ")
         $("#loggedPage").append("<input id='range' value='{{range}}' />")
         $("#loggedPage").append("<button id='changeRange' onclick='updateRange()'>Update Range</button><br><br>")
@@ -70,7 +71,7 @@
             numberMessages += data.length
             if(data.length > 0)
                 data.forEach(function(e){e.pop();console.log(e)})
-                $("#receivedMsgs").append(data.join('\n')+'\n')//data["message"])
+                $("#receivedMsgs").append(data.join('\n'))//data["message"])
             setTimeout(getMessages, 1000);
         }
       });
@@ -83,24 +84,41 @@
     }
 
     function showPosition(position) {
-        console.log('User position has changed')
-        if (pos != {'lat': position.coords.latitude , 'lon': position.coords.longitude}){
-        }
-        pos = {'lat': position.coords.latitude , 'lon': position.coords.longitude}
-        $.ajax({
-            type: "POST",
-            url: '/API/users/{{istID}}/location',
-            datatype: "json",
-            contentType: "application/json",
-            data: JSON.stringify(pos),
-            success: function(data) {
-                $('#lat').val(Math.round(position.coords.latitude * 1000) / 1000)
-                $('#lon').val(Math.round(position.coords.longitude * 1000) / 1000)
-            },
-            complete: function() {
-                console.log('position send')
+        if(posFixed == 0){
+            console.log('User position has changed')
+            if (pos != {'lat': position.coords.latitude , 'lon': position.coords.longitude} && position.coords.latitude != null && position.position.coords.longitude != null){
+                pos = {'lat': position.coords.latitude , 'lon': position.coords.longitude}
+                $.ajax({
+                    type: "POST",
+                    url: '/API/users/{{istID}}/location',
+                    datatype: "json",
+                    contentType: "application/json",
+                    data: JSON.stringify(pos),
+                    success: function(data) {
+                        $('#lat').val(Math.round(position.coords.latitude * 1000) / 1000)
+                        $('#lon').val(Math.round(position.coords.longitude * 1000) / 1000)
+                    },
+                    complete: function() {
+                        console.log('position send')
+                    }
+                }); 
             }
-        });        
+        }else{
+            if($('#lat').val() != null && $('#lon').val() != null){
+                pos = {'lat': $('#lat').val() , 'lon': $('#lon').val()}
+
+                $.ajax({
+                    type: "POST",
+                    url: '/API/users/{{istID}}/location',
+                    datatype: "json",
+                    contentType: "application/json",
+                    data: JSON.stringify(pos),
+                    success: function(data) {
+                        console.log('Position set')
+                    }
+                }); 
+            }
+        }         
     }
 
     (function getUsersInRangeAndInBuilding(){
@@ -126,6 +144,16 @@
                 console.log('Range updated')
             }
         });
+    }
+
+    function updateLoc() {
+        if(posFixed == 0){
+            posFixed = 1
+            $('#changeLoc').val('Get Current Location')
+        }else{
+            posFixed = 0
+            $('#changeLoc').val('Force Location')
+        }
     }
 
 </script>
