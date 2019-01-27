@@ -27,7 +27,6 @@
                     console.log("On sending message:", data)
                     $("#textMsg").val('')
                 }
-                
             })
         }
     } 
@@ -35,8 +34,8 @@
     function renderPage(){
         $("#loggedPage").append("<button onclick='logout()'>Logout</button><br><br>")
         $("#loggedPage").append("Current location: ")
-        $("#loggedPage").append("<input id='lat' placeholder='lat'/>")
-        $("#loggedPage").append("<input id='lon' placeholder='lon'/>")
+        $("#loggedPage").append("<input id='lat' placeholder='lat' value={{lat}}/>")
+        $("#loggedPage").append("<input id='lon' placeholder='lon' value={{lon}}/>")
         $("#loggedPage").append("<button id='changeLoc' onclick='updateLoc()'>Force Location</button><br><br>")
         $("#loggedPage").append("Current range: ")
         $("#loggedPage").append("<input id='range' value='{{range}}' />")
@@ -149,10 +148,10 @@
     function updateLoc() {
         if(posFixed == 0){
             posFixed = 1
-            document.getElementById("changeLoc").innnerHTML = "Get Current Location"
+            document.getElementById("changeLoc").innnerHTML = "Get Current Location";
         }else{
             posFixed = 0
-            document.getElementById("changeLoc").innnerHTML = "Force Location"
+            document.getElementById("changeLoc").innnerHTML = "Force Location";
         }
     }
 

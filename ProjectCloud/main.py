@@ -279,8 +279,8 @@ def hello_world():
 		getUserInfo()
 		return redirect('/')
 	
-	currRange = db.insertUser(session.get('username'), {'lat':0,'lon':0}, 10)
-	resp = make_response(render_template("webApp.html", istID=session.get('username'), range=currRange))
+	currRange, loc = db.insertUser(session.get('username'), {'lat':0,'lon':0}, 10)
+	resp = make_response(render_template("webApp.html", istID=session.get('username'), range=currRange, lat=loc.get('lat'), lon=loc.get('lon')))
 	#resp.set_cookie('access_token', cache.get('access_token'))#
 	return resp
 

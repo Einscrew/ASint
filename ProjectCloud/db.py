@@ -20,10 +20,10 @@ class Db():
 	def insertUser(self, istID, location, myRange):
 		try:
 			self.db['users'].insert_one({'_id': istID, 'location': location, 'range': myRange, 'building': None})#update_one({'_id': istID}, {'_id': istID, 'location': location, 'range': myRange, 'building': None},upsert=True)
-			return myRange
+			return myRange, location
 		except pymongo.errors.DuplicateKeyError:
 			print('Error inserting user, because already exists')
-			return self.db['users'].find_one({'_id': istID}).get('range')
+			return self.db['users'].find_one({'_id': istID}).get('range'), self.db['users'].find_one({'_id': istID}).get('location')
 
 	def removeUser(self, istID):
 		try:
