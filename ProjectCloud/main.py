@@ -23,13 +23,13 @@ cache = volatileSet()
 db = db.Db()
 
 
-if len(sys.argv) > 1:
+'''if len(sys.argv) > 1:
 	file = "keys.json"
-else:
-	file = "keyscloud.json"
+else:'''
+file = "keyscloud.json"
 
 with open(file,'r') as f:
-		APP = json.load(f)
+	APP = json.load(f)
 
 with open("secret", 'rb') as f:
 	app.secret_key = f.read()
