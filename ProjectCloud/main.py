@@ -41,7 +41,7 @@ else:
 			c = self.memcache.add('vol')
 			c.add(key, timeout=t)
 			self.memcache.set('vol', c)'''
-	cache = cacheProxy()			
+	cache = volatileSet()#cacheProxy()			
 
 with open(file,'r') as f:
 	APP = json.load(f)
