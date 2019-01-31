@@ -30,19 +30,18 @@ if getenv('HOST') != 'GAE':
 else:
 	print('Running in GOOGLE APP ENGINE')
 	file = "keyscloud.json"
-	from google.appengine.api import memcache
-class cacheProxy:
-	def __init__(self):
-		self.memcache = memcache
-		self.memcache.add('vol',volatileSet())
-	def getAll(self):
-		return self.memcache.get('vol').getAll()
-	def add(self, key, t=datetime.timedelta(days=1000)):
-		c = self.memcache.add('vol')
-		c.add(key, timeout=t)
-		self.memcache.set('vol', c)
-		
-cache = cacheProxy()			
+	'''from google.appengine.api import memcache
+	class cacheProxy:
+		def __init__(self):
+			self.memcache = memcache
+			self.memcache.add('vol',volatileSet())
+		def getAll(self):
+			return self.memcache.get('vol').getAll()
+		def add(self, key, t=datetime.timedelta(days=1000)):
+			c = self.memcache.add('vol')
+			c.add(key, timeout=t)
+			self.memcache.set('vol', c)'''
+	cache = cacheProxy()			
 
 with open(file,'r') as f:
 	APP = json.load(f)
