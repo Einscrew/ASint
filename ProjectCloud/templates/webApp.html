@@ -67,11 +67,14 @@
         data: JSON.stringify({'number':numberMessages}),
         contentType: "application/json",
         success:function(data) {
+            console.log('data:',data)
             console.log('ok '+data.length+' messages ('+numberMessages+')')
-            numberMessages += data.length
-            if(data.length > 0)
+            if(data.length > 0){
+                numberMessages += data.length
                 data.forEach(function(e){e.pop();console.log(e)})
-                $("#receivedMsgs").append(data.join('\n'))//data["message"])
+                $("#receivedMsgs").append(data.join('\n'),'\n')
+            }
+
             setTimeout(getMessages, 1000);
         }
       });
@@ -95,8 +98,8 @@
                     contentType: "application/json",
                     data: JSON.stringify(pos),
                     success: function(data) {
-                        $('#lat').val(Math.round(position.coords.latitude * 1000) / 1000)
-                        $('#lon').val(Math.round(position.coords.longitude * 1000) / 1000)
+                        $('#lat').val(position.coords.latitude)
+                        $('#lon').val(position.coords.longitude)
                     },
                     complete: function() {
                         console.log('position send')

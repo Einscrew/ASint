@@ -1,4 +1,11 @@
 [ {
+    "_id" : "123",
+    "name" : "Casa",
+    "location":{
+        "lat": 38.711346999999996,
+        "lon" : -9.1317797
+    }
+  }, {
     "_id" : "2448131361042",
     "name" : "Pavilhão de Civil",
     "location":{

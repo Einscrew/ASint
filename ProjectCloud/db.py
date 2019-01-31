@@ -75,16 +75,18 @@ class Db():
 		if istID:
 			user = self.db['users'].find_one({'_id': istID})
 			building = user['building']
-
+			print('by user', istID, building)
+			if building != None:
+				users = self.db['users'].find({'_id':{'$in':allusers}})
+				return set(u['_id'] for u in users if u['_id'] != istID and not set(u['building']).isdisjoint(building))
+			else:
+				return None
 		else:
 			building = filter.get('building')
-
-		users = self.db['users'].find({'_id':{'$in':allusers}})
-		if building != None:
-			return set(u['_id'] for u in users if u['_id'] != istID and not set(u['building']).isdisjoint(building))
-		else:
-			return None
-
+			print('by building', building)
+			print('<>>>',*self.db['users'].find({'_id':{'$in':allusers},'building':building}))
+			users = self.db['users'].find({'_id':{'$in':allusers},'building':building})
+			return set(u['_id'] for u in users)
 
 	#________________________________________________________________________
 	#### Movements ####
@@ -136,6 +138,7 @@ class Db():
 
 	def getUserMessages(self, user, lastIndex=0):
 		lastIndex = lastIndex if lastIndex > 0 else 0
+		print(*self.db['messages'].find({'dst': user}).skip(lastIndex))
 		try:
 			r = [ [i['src'],i['content'], i['time'],i['location']] for i in self.db['messages'].find({'dst': user}).skip(lastIndex)]#.sort(key=lambda e: e[2])
 			return r#excludes destiny from the result

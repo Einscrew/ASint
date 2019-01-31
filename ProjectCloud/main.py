@@ -23,10 +23,10 @@ cache = volatileSet()
 db = db.Db()
 
 
-'''if len(sys.argv) > 1:
+if len(sys.argv) > 1:
 	file = "keys.json"
-else:'''
-file = "keyscloud.json"
+else:
+	file = "keyscloud.json"
 
 with open(file,'r') as f:
 	APP = json.load(f)
@@ -118,7 +118,9 @@ def listUsers():
 @app.route('/API/admin/buildings/<string:buildingID>/users', methods=['POST'])
 @admin
 def listUsersInBuilding(buildingID):
+	print('cache: ',cache.getAll())
 	usersInBuilding = db.getUsersInSameBuilding({'building':buildingID}, allusers = cache.getAll())
+	print('result:',usersInBuilding)
 	return jsonify({'users':list(usersInBuilding)})
 
 #History
