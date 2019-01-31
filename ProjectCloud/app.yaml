@@ -1,5 +1,8 @@
 runtime: python37
 
+env_variables:
+  HOST: "GAE"
+
 handlers:
   # This configures Google App Engine to serve the files in the app's static
   # directory.

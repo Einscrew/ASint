@@ -3,12 +3,14 @@ from flask import Flask, Response, abort, make_response, render_template, reques
 from itertools import chain
 import db
 
-
 from cacheSet import volatileSet
 
 from functools import wraps
 
 from random import randint
+
+from os import getenv
+
 import requests
 import json
 
@@ -22,10 +24,11 @@ cache = volatileSet()
 
 db = db.Db()
 
-
-if len(sys.argv) > 1:
+if getenv('HOST') != 'GAE':
+	print('Running in LOCALHOST')
 	file = "keys.json"
 else:
+	print('Running in GOOGLE APP ENGINE')
 	file = "keyscloud.json"
 
 with open(file,'r') as f:
